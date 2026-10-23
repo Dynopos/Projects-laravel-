@@ -1,0 +1,47 @@
+name: Ujian
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ujian:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, pdo_sqlite, intl, mbstring
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Gaya kod
+        run: ./vendor/bin/pint --test
+      - name: Ujian (SQLite)
+        run: php artisan test
+      # RLS diabaikan oleh superuser — ujian mesti berjalan sebagai pengguna biasa.
+      - name: Sediakan pengguna PostgreSQL bukan superuser
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h 127.0.0.1 -U postgres -c "create role dyno login password 'dyno';"
+          psql -h 127.0.0.1 -U postgres -c "create database dyno_ujian owner dyno;"
+      - name: Ujian (PostgreSQL + RLS)
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: dyno_ujian
+          DB_USERNAME: dyno
+          DB_PASSWORD: dyno
+        run: php artisan test
