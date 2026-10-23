@@ -17,6 +17,12 @@ class Syarikat extends Model
 {
     use HasFactory;
 
+    /** Sama dengan nilai lalai migrasi — supaya model yang baru dicipta tidak null. */
+    protected $attributes = [
+        'sufiks' => '', 'jabatan' => 'Jabatan Projek', 'kod_awalan' => 'PRJ-',
+        'status' => 'percubaan', 'zon_waktu' => 'Asia/Kuala_Lumpur',
+    ];
+
     public function keahlian(): HasMany
     {
         return $this->hasMany(Keahlian::class);
@@ -55,6 +61,15 @@ class Syarikat extends Model
     public function inisial(): string
     {
         return collect(preg_split('/\s+/', trim($this->nama)))->take(2)->map(fn ($w) => mb_substr($w, 0, 1))->implode('');
+    }
+
+    /** URL penuh ke laluan dalam ruang syarikat ini (untuk e-mel). */
+    public function url(string $laluan = '/'): string
+    {
+        $skema = parse_url((string) config('app.url'), PHP_URL_SCHEME) ?: 'https';
+        $hos = $this->domain ?: $this->subdomain.'.'.config('dyno.domain_utama');
+
+        return $skema.'://'.$hos.'/'.ltrim($laluan, '/');
     }
 
     public function bacaSahaja(): bool

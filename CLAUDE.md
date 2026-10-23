@@ -91,6 +91,21 @@ mesti beri Baki Terkini **RM227,400**, duit masuk RM1,269,100, belanja RM1,041,7
 Jangan bergantung pada menyembunyikan butang — setiap tindakan Livewire panggil
 `$this->authorize()`. Syarikat berstatus `baca_sahaja`/`digantung` tak boleh menulis.
 
+## Jemputan
+
+Satu-satunya cara akaun baharu wujud. `UrusAhli` (Livewire) hantar `JemputanMail`;
+`JemputanController` terima di `/jemputan/{token}`.
+
+- Token asal hanya dalam e-mel; jadual simpan **hash SHA-256**. Sah 7 hari, sekali guna,
+  hantar semula membatalkan pautan lama.
+- `Jemputan` guna `MilikSyarikat`: token syarikat A tak berfungsi pada subdomain B.
+- E-mel baharu → tetapkan nama + kata laluan. Akaun sedia ada (ahli syarikat lain) →
+  sahkan dengan kata laluan sedia ada, bukan tetapkan semula.
+- `Peranan::bolehUrus()`: pemilik urus semua; pengurus jemput & urus staf sahaja.
+  Tiada sesiapa boleh ubah keahlian sendiri (elak pemilik terkunci di luar).
+- Produksi perlukan `MAIL_*` sebenar (Postmark/SES/Mailgun). Tempatan: `MAIL_MAILER=log`,
+  pautan ada dalam `storage/logs/laravel.log`.
+
 ## Log aktiviti
 
 Tambah & baca sahaja. `CatatAktiviti` (observer) merekod setiap perubahan projek,
@@ -133,7 +148,8 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 
 - [x] **Fasa 1 — asas:** multi-tenant 3 lapisan, peranan, kiraan, Dashboard 8 kotak +
   Baki Terkini, projek/arkib, butiran projek dengan bayaran & perbelanjaan, log aktiviti, 40 ujian
-- [ ] Jemputan staf melalui e-mel, urus ahli, tetapan syarikat (peringkat, kategori, logo)
+- [x] Jemputan staf melalui e-mel, urus ahli (halaman Ahli & Jemputan)
+- [ ] Tetapan syarikat (peringkat, kategori, logo)
 - [ ] Gambar resit (storan S3 peribadi + URL bertandatangan), eksport CSV
 - [ ] Import Excel — port `huraiFlow()` + ujian regresi RM184,193 / RM83,861
 - [ ] Panel pentadbir (Filament), langganan + payment gateway

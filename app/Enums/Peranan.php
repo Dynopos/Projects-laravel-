@@ -30,4 +30,24 @@ enum Peranan: string
     {
         return $this !== self::Staf;
     }
+
+    /**
+     * Peranan yang boleh dijemput / diurus oleh peranan ini.
+     * Pemilik: semua. Pengurus: staf sahaja. Lain-lain: tiada.
+     *
+     * @return list<self>
+     */
+    public function bolehUrus(): array
+    {
+        return match ($this) {
+            self::Pemilik => self::cases(),
+            self::Pengurus => [self::Staf],
+            default => [],
+        };
+    }
+
+    public function bolehUrusPeranan(self $sasaran): bool
+    {
+        return in_array($sasaran, $this->bolehUrus(), true);
+    }
 }
