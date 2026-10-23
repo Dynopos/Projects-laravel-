@@ -12,13 +12,32 @@ use Illuminate\Database\Eloquent\Model;
 /** Setiap perubahan pada projek, bayaran dan belanja masuk log aktiviti secara automatik. */
 class CatatAktiviti
 {
+    private static int $senyap = 0;
+
+    /** Jalankan $fn tanpa log setiap rekod (cth import pukal — satu log ringkasan sahaja). */
+    public static function senyap(callable $fn): mixed
+    {
+        self::$senyap++;
+        try {
+            return $fn();
+        } finally {
+            self::$senyap--;
+        }
+    }
+
     public function created(Model $m): void
     {
+        if (self::$senyap) {
+            return;
+        }
         LogAktiviti::catat('Tambah '.$this->jenis($m), $this->ringkas($m));
     }
 
     public function updated(Model $m): void
     {
+        if (self::$senyap) {
+            return;
+        }
         $ubah = collect($m->getChanges())->except(['updated_at', 'diubah_oleh'])->keys()->implode(', ');
         if ($ubah !== '') {
             LogAktiviti::catat('Ubah '.$this->jenis($m), $this->ringkas($m)." ({$ubah})");
@@ -27,6 +46,9 @@ class CatatAktiviti
 
     public function deleted(Model $m): void
     {
+        if (self::$senyap) {
+            return;
+        }
         LogAktiviti::catat('Padam '.$this->jenis($m), $this->ringkas($m));
     }
 

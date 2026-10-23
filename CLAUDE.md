@@ -118,6 +118,32 @@ Satu-satunya cara akaun baharu wujud. `UrusAhli` (Livewire) hantar `JemputanMail
 - Kategori: tukar nama turut `update belanja set kategori` (dalam transaksi, ikut scope
   syarikat). Kategori yang masih digunakan tidak boleh dipadam.
 
+## Import Excel — `app/Import/`
+
+`BacaFail` (PhpSpreadsheet) → `HuraiFlow::hurai()` dicuba dahulu → `HuraiGenerik::hurai()`
+untuk helaian dipilih → `SimpanImport::simpan()`. Halaman: `ImportExcel` (pemilik & pengurus).
+
+- `HuraiFlow` = port baris-demi-baris `huraiFlow()`/`wangFC()`/`tkhFC()` versi HTML.
+  Peraturan sama: lajur "Total Payment By Client" muktamad, nyahduplikasi ikut RM terdekat,
+  teks tarikh M/D/YY, sel tarikh dalam lajur wang ditolak, kod `{awalan}01…NN`.
+- Beza dari HTML: sel **tarikh sebenar** dibaca terus sebagai Y-m-d (bukan teks yang diteka),
+  dan `wang()` juga menolak Y-m-d supaya tarikh tak jadi amaun.
+- `SimpanImport` dalam **satu transaksi**. Projek dipadan ikut kod: wujud = diganti berserta
+  semua bayarannya (pratonton mengira bayaran manual, `diimport = false`, yang akan hilang);
+  "Hanya projek baharu" melangkau yang wujud. Belanja tidak disentuh. Satu log ringkasan
+  (`CatatAktiviti::senyap()`), bukan satu log setiap rekod.
+- Generik: baris tanpa kod disambung dari `Projek::kodSeterusnya()` — tak menimpa projek sedia ada.
+
+### Ujian regresi — WAJIB bila `HuraiFlow` diubah
+
+`tests/Support/FailContoh.php` membina fail PROJECT FLOW **rekaan** (4 projek · 5 bayaran ·
+RM29,000 · RM10,000). Fail sebenar pelanggan **tidak boleh** masuk repo; jalankan:
+
+```bash
+DYNO_FAIL_PROJECT_FLOW="/laluan/PROJECT LISTING 2026 FCI.xls" php artisan test --filter=sebenar
+# jangkaan: 10 projek · 16 bayaran · RM184,193.00 · RM83,861.00
+```
+
 ## Log aktiviti
 
 Tambah & baca sahaja. `CatatAktiviti` (observer) merekod setiap perubahan projek,
@@ -163,7 +189,7 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] Jemputan staf melalui e-mel, urus ahli (halaman Ahli & Jemputan)
 - [x] Tetapan syarikat: maklumat, awalan kod, zon waktu, logo, peringkat kerja, kategori perbelanjaan
 - [ ] Gambar resit (storan S3 peribadi + URL bertandatangan), eksport CSV
-- [ ] Import Excel — port `huraiFlow()` + ujian regresi RM184,193 / RM83,861
+- [x] Import Excel — PROJECT FLOW (`HuraiFlow`) + generik (`HuraiGenerik`), pratonton & amaran
 - [ ] Panel pentadbir (Filament), langganan + payment gateway
 - [ ] PWA, masa nyata (Reverb)
 - [ ] Migrasi Fine Cabinetry

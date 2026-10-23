@@ -23,6 +23,9 @@
     <a href="{{ route('arkib') }}" wire:navigate @class(['on' => request()->routeIs('arkib')])><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1.5"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12h4"/></svg> Projek Siap</a>
     @if($u->peranan() !== \App\Enums\Peranan::Staf)
       <div class="navlab" style="margin-top:16px">DATA</div>
+      @if($u->peranan()?->pengurusan())
+        <a href="{{ route('import') }}" wire:navigate @class(['on' => request()->routeIs('import')])><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg> Import Excel</a>
+      @endif
       <a href="{{ route('log') }}" wire:navigate @class(['on' => request()->routeIs('log')])><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg> Log Aktiviti</a>
       @if($u->peranan()?->bolehTetapan())
         <a href="{{ route('tetapan') }}" wire:navigate @class(['on' => request()->routeIs('tetapan')])><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg> Tetapan</a>

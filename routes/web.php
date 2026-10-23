@@ -5,6 +5,7 @@ use App\Http\Controllers\LogoController;
 use App\Http\Controllers\SesiController;
 use App\Livewire\ButiranProjek;
 use App\Livewire\Dashboard;
+use App\Livewire\ImportExcel;
 use App\Livewire\LogAktivitiSenarai;
 use App\Livewire\SenaraiProjek;
 use App\Livewire\TetapanSyarikat;
@@ -34,5 +35,6 @@ Route::middleware('syarikat')->group(function () {
         Route::livewire('/log', LogAktivitiSenarai::class)->name('log');
         Route::livewire('/ahli', UrusAhli::class)->name('ahli');
         Route::livewire('/tetapan', TetapanSyarikat::class)->name('tetapan');
+        Route::livewire('/import', ImportExcel::class)->name('import');
     });
 });
