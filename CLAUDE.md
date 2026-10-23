@@ -106,6 +106,18 @@ Satu-satunya cara akaun baharu wujud. `UrusAhli` (Livewire) hantar `JemputanMail
 - Produksi perlukan `MAIL_*` sebenar (Postmark/SES/Mailgun). Tempatan: `MAIL_MAILER=log`,
   pautan ada dalam `storage/logs/laravel.log`.
 
+## Tetapan syarikat
+
+`TetapanSyarikat` (Livewire) — **pemilik sahaja** (`Peranan::bolehTetapan()`).
+
+- Logo: dilukis semula oleh GD (`App\Support\Logo`) ke PNG ≤256×256; fail asal tidak
+  disimpan, SVG ditolak. Disimpan pada cakera `config('dyno.cakera')` dan dihidang oleh
+  `/logo` (tanpa log masuk — skrin log masuk perlukannya). URL ada `?v=` untuk cache.
+- Peringkat: `kunci` dijana sekali dari label dan **tidak pernah berubah** (disimpan dalam
+  `projek.aliran`). Padam peringkat tidak memadam tanda dalam projek.
+- Kategori: tukar nama turut `update belanja set kategori` (dalam transaksi, ikut scope
+  syarikat). Kategori yang masih digunakan tidak boleh dipadam.
+
 ## Log aktiviti
 
 Tambah & baca sahaja. `CatatAktiviti` (observer) merekod setiap perubahan projek,
@@ -149,7 +161,7 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] **Fasa 1 — asas:** multi-tenant 3 lapisan, peranan, kiraan, Dashboard 8 kotak +
   Baki Terkini, projek/arkib, butiran projek dengan bayaran & perbelanjaan, log aktiviti, 40 ujian
 - [x] Jemputan staf melalui e-mel, urus ahli (halaman Ahli & Jemputan)
-- [ ] Tetapan syarikat (peringkat, kategori, logo)
+- [x] Tetapan syarikat: maklumat, awalan kod, zon waktu, logo, peringkat kerja, kategori perbelanjaan
 - [ ] Gambar resit (storan S3 peribadi + URL bertandatangan), eksport CSV
 - [ ] Import Excel — port `huraiFlow()` + ujian regresi RM184,193 / RM83,861
 - [ ] Panel pentadbir (Filament), langganan + payment gateway

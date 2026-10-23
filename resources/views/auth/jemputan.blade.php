@@ -11,7 +11,7 @@
 <body>
 <div class="gate">
   <div class="gatebox">
-    <div class="logo" style="padding-bottom:18px"><i>{{ $syarikat->inisial() }}</i><span>{{ $syarikat->nama }}<em>{{ $syarikat->sufiks }}</em><small>{{ $syarikat->jabatan }}</small></span></div>
+    <div class="logo" style="padding-bottom:18px">@if($syarikat->urlLogo())<i style="background:none;box-shadow:none;overflow:hidden"><img src="{{ $syarikat->urlLogo() }}" alt="" style="width:100%;height:100%;object-fit:contain"></i>@else<i>{{ $syarikat->inisial() }}</i>@endif<span>{{ $syarikat->nama }}<em>{{ $syarikat->sufiks }}</em><small>{{ $syarikat->jabatan }}</small></span></div>
 
     @if(! $jemputan)
       <h2 style="font-family:var(--serif);margin:0 0 8px">Jemputan tidak sah</h2>

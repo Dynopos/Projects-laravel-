@@ -63,6 +63,12 @@ class Syarikat extends Model
         return collect(preg_split('/\s+/', trim($this->nama)))->take(2)->map(fn ($w) => mb_substr($w, 0, 1))->implode('');
     }
 
+    /** URL logo dengan versi supaya cache browser dikemas kini bila logo ditukar. */
+    public function urlLogo(): ?string
+    {
+        return $this->logo_path ? url('/logo').'?v='.substr(md5($this->logo_path), 0, 8) : null;
+    }
+
     /** URL penuh ke laluan dalam ruang syarikat ini (untuk e-mel). */
     public function url(string $laluan = '/'): string
     {

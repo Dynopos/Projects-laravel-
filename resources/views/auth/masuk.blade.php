@@ -11,7 +11,7 @@
 <div class="gate">
   <form class="gatebox" method="post" action="{{ url('/masuk') }}">
     @csrf
-    <div class="logo" style="padding-bottom:18px"><i>{{ $syarikat->inisial() }}</i><span>{{ $syarikat->nama }}<em>{{ $syarikat->sufiks }}</em><small>{{ $syarikat->jabatan }}</small></span></div>
+    <div class="logo" style="padding-bottom:18px">@if($syarikat->urlLogo())<i style="background:none;box-shadow:none;overflow:hidden"><img src="{{ $syarikat->urlLogo() }}" alt="" style="width:100%;height:100%;object-fit:contain"></i>@else<i>{{ $syarikat->inisial() }}</i>@endif<span>{{ $syarikat->nama }}<em>{{ $syarikat->sufiks }}</em><small>{{ $syarikat->jabatan }}</small></span></div>
     <p style="margin:0 0 4px;color:var(--ink2)">Log masuk untuk teruskan.</p>
     <label for="email">E-mel</label>
     <input class="field" id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="username" required autofocus placeholder="nama@syarikat.com">

@@ -16,7 +16,7 @@
   <div class="tabir" id="tabir" onclick="togolMenu(false)"></div>
 
   <nav class="side">
-    <div class="logo"><i>{{ $syarikat->inisial() }}</i><span>{{ $syarikat->nama }}<em>{{ $syarikat->sufiks }}</em><small>{{ $syarikat->jabatan }}</small></span></div>
+    <div class="logo">@if($syarikat->urlLogo())<i style="background:none;box-shadow:none;overflow:hidden"><img src="{{ $syarikat->urlLogo() }}" alt="" style="width:100%;height:100%;object-fit:contain"></i>@else<i>{{ $syarikat->inisial() }}</i>@endif<span>{{ $syarikat->nama }}<em>{{ $syarikat->sufiks }}</em><small>{{ $syarikat->jabatan }}</small></span></div>
     <div class="navlab">MENU</div>
     <a href="{{ route('dashboard') }}" wire:navigate @class(['on' => request()->routeIs('dashboard')])><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg> Dashboard</a>
     <a href="{{ route('projek') }}" wire:navigate @class(['on' => request()->routeIs('projek', 'projek.butiran')])><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Projek</a>
@@ -24,6 +24,9 @@
     @if($u->peranan() !== \App\Enums\Peranan::Staf)
       <div class="navlab" style="margin-top:16px">DATA</div>
       <a href="{{ route('log') }}" wire:navigate @class(['on' => request()->routeIs('log')])><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg> Log Aktiviti</a>
+      @if($u->peranan()?->bolehTetapan())
+        <a href="{{ route('tetapan') }}" wire:navigate @class(['on' => request()->routeIs('tetapan')])><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg> Tetapan</a>
+      @endif
       @if($u->peranan()?->bolehUrus())
         <a href="{{ route('ahli') }}" wire:navigate @class(['on' => request()->routeIs('ahli')])><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><path d="M19 8v6M16 11h6"/></svg> Ahli &amp; Jemputan</a>
       @endif

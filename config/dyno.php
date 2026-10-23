@@ -9,6 +9,9 @@ return [
     // Kosongkan dalam produksi.
     'syarikat_lalai' => env('DYNO_SYARIKAT_LALAI'),
 
+    // Cakera untuk fail syarikat (logo; kelak resit). Produksi: s3 (R2/Spaces), peribadi.
+    'cakera' => env('DYNO_CAKERA', 'local'),
+
     // Peringkat aliran & kategori perbelanjaan untuk syarikat baharu.
     // Selepas dicipta, setiap syarikat ubah sendiri (jadual peringkat_aliran / kategori_belanja).
     'peringkat_lalai' => [

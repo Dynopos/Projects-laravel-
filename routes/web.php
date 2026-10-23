@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\JemputanController;
+use App\Http\Controllers\LogoController;
 use App\Http\Controllers\SesiController;
 use App\Livewire\ButiranProjek;
 use App\Livewire\Dashboard;
 use App\Livewire\LogAktivitiSenarai;
 use App\Livewire\SenaraiProjek;
+use App\Livewire\TetapanSyarikat;
 use App\Livewire\UrusAhli;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +17,8 @@ Route::middleware('syarikat')->group(function () {
         Route::get('/masuk', [SesiController::class, 'borang'])->name('masuk');
         Route::post('/masuk', [SesiController::class, 'masuk'])->middleware('throttle:masuk');
     });
+
+    Route::get('/logo', LogoController::class)->name('logo');
 
     // Pautan dari e-mel jemputan — dibuka sebelum akaun wujud.
     Route::get('/jemputan/{token}', [JemputanController::class, 'borang'])->name('jemputan');
@@ -29,5 +33,6 @@ Route::middleware('syarikat')->group(function () {
         Route::livewire('/projek/{projek}', ButiranProjek::class)->name('projek.butiran');
         Route::livewire('/log', LogAktivitiSenarai::class)->name('log');
         Route::livewire('/ahli', UrusAhli::class)->name('ahli');
+        Route::livewire('/tetapan', TetapanSyarikat::class)->name('tetapan');
     });
 });

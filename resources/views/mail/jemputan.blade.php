@@ -5,6 +5,7 @@
   <tr><td align="center">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#141310;border:1px solid #26241d;border-radius:18px">
       <tr><td style="padding:28px 28px 8px">
+        @if($syarikat->logo_path)<img src="{{ $syarikat->url('logo') }}" alt="" width="56" height="56" style="display:block;width:56px;height:56px;object-fit:contain;margin:0 0 12px;border-radius:10px">@endif
         <p style="margin:0;font-family:Georgia,serif;font-size:15px;font-weight:bold;letter-spacing:.04em;color:#f6f2e8">{{ $syarikat->nama }}<span style="color:#d4a437">{{ $syarikat->sufiks }}</span></p>
         <p style="margin:2px 0 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#867f6d">{{ $syarikat->jabatan }}</p>
       </td></tr>

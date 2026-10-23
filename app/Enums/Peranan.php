@@ -26,6 +26,12 @@ enum Peranan: string
         return $this !== self::Staf;
     }
 
+    /** Tetapan syarikat (nama, logo, peringkat, kategori) — pemilik sahaja. */
+    public function bolehTetapan(): bool
+    {
+        return $this === self::Pemilik;
+    }
+
     public function bolehEksport(): bool
     {
         return $this !== self::Staf;
