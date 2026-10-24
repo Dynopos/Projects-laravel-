@@ -2,7 +2,9 @@
 
 use App\Enums\Peranan;
 use App\Models\Bayaran;
+use App\Models\KategoriBelanja;
 use App\Models\LogAktiviti;
+use App\Models\PeringkatAliran;
 use App\Models\Projek;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -81,4 +83,12 @@ it('log aktiviti kekal dalam syarikat masing-masing', function () {
     semasa()->sebagai($this->a, fn () => LogAktiviti::catat('Ujian', 'A'));
     semasa()->tetapkan($this->b);
     expect(LogAktiviti::where('butiran', 'A')->count())->toBe(0);
+});
+
+it('setiap syarikat baharu dapat peringkat & kategori lalai sendiri', function () {
+    foreach ([$this->a, $this->b] as $s) {
+        semasa()->tetapkan($s);
+        expect(PeringkatAliran::count())->toBe(count(config('dyno.peringkat_lalai')))
+            ->and(KategoriBelanja::count())->toBe(count(config('dyno.kategori_lalai')));
+    }
 });

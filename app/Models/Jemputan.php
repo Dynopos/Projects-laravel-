@@ -37,7 +37,7 @@ class Jemputan extends Model
      *
      * @return array{0: self, 1: string}
      */
-    public static function terbitkan(string $email, Peranan $peranan, User $oleh): array
+    public static function terbitkan(string $email, Peranan $peranan, ?User $oleh): array
     {
         $token = Str::random(48);
         $email = Str::lower(trim($email));
@@ -47,7 +47,7 @@ class Jemputan extends Model
         $j = new static(['email' => $email, 'peranan' => $peranan]);
         $j->forceFill([
             'token' => hash('sha256', $token),
-            'dijemput_oleh' => $oleh->id,
+            'dijemput_oleh' => $oleh?->id,
             'tamat_pada' => now()->addDays(self::TEMPOH_HARI),
         ])->save();
 

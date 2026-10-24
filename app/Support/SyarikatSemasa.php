@@ -68,16 +68,29 @@ class SyarikatSemasa
         }
     }
 
-    /** Jalankan $fn sebagai syarikat lain, kemudian pulihkan syarikat asal. */
+    /**
+     * Jalankan $fn TEPAT sebagai syarikat lain (scope & RLS aktif, walaupun dipanggil dari
+     * dalam tanpaSkop()), kemudian pulihkan keadaan asal. Tanpa ini, firstOrCreate() dalam
+     * $fn akan terjumpa baris syarikat lain dan tidak mencipta apa-apa.
+     */
     public function sebagai(Syarikat $syarikat, callable $fn): mixed
     {
         $asal = $this->syarikat;
+        $pintasAsal = $this->pintas;
+        if ($pintasAsal > 0) {
+            $this->pintas = 0;
+            $this->tetapkanPg('app.pintas_rls', '');
+        }
         $this->tetapkan($syarikat);
 
         try {
             return $fn();
         } finally {
             $this->tetapkan($asal);
+            if ($pintasAsal > 0) {
+                $this->pintas = $pintasAsal;
+                $this->tetapkanPg('app.pintas_rls', 'on');
+            }
         }
     }
 

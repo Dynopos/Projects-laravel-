@@ -1,0 +1,7 @@
+{
+    "private": true,
+    "description": "Tiada build step — CSS dalam public/css. Fail ini wujud supaya skrip deploy lalai (Forge: npm ci && npm run build) tidak gagal.",
+    "scripts": {
+        "build": "echo \"Tiada build step untuk Dyno Project OS\""
+    }
+}

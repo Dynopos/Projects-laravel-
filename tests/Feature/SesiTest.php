@@ -1,8 +1,13 @@
 <?php
 
 use App\Enums\Peranan;
+use App\Mail\JemputanMail;
 use App\Models\LogAktiviti;
+use App\Models\PeringkatAliran;
+use App\Models\Syarikat;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 beforeEach(function () {
     $this->s = syarikatBaru(['nama' => 'BINAAN UJIAN']);
@@ -49,3 +54,31 @@ it('log aktiviti tidak boleh diubah walaupun dengan SQL terus', function () {
     expect(semasa()->tanpaSkop(fn () => DB::table('log_aktiviti')->where('id', $log->id)->update(['butiran' => 'x'])))->toBe(0);
     expect(DB::table('log_aktiviti')->where('id', $log->id)->value('butiran'))->toBe('asal');
 })->skip(fn () => ! pgsql(), 'Trigger hanya dalam PostgreSQL');
+
+it('arahan dyno:syarikat-baru mencipta syarikat dan jemputan pemilik yang berfungsi', function () {
+    Mail::fake();
+
+    $this->artisan('dyno:syarikat-baru', ['nama' => 'BINAAN MAJU', 'subdomain' => 'binaanmaju', 'emel' => 'Bos@Maju.test', '--awalan' => 'BM-'])
+        ->expectsOutputToContain('dicipta')->assertSuccessful();
+
+    $s = semasa()->tanpaSkop(fn () => Syarikat::where('subdomain', 'binaanmaju')->sole());
+    expect($s)->kod_awalan->toBe('BM-')->status->toBe('aktif');
+
+    $pautan = null;
+    Mail::assertSent(JemputanMail::class, function ($m) use (&$pautan) {
+        $pautan = $m->pautan;
+
+        return $m->hasTo('bos@maju.test');
+    });
+    $this->post($pautan, ['name' => 'Bos Maju', 'password' => 'rahsia-bos', 'password_confirmation' => 'rahsia-bos'])->assertRedirect();
+    expect(User::where('email', 'bos@maju.test')->sole()->keahlianDi($s)->peranan)->toBe(Peranan::Pemilik);
+
+    semasa()->tetapkan($s);
+    expect(PeringkatAliran::count())->toBeGreaterThan(0);
+});
+
+it('arahan dyno:syarikat-baru menolak subdomain pendua atau tidak sah', function () {
+    $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => $this->s->subdomain, 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();
+    $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => 'Bukan Sah!', 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();
+    $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => 'www', 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();
+});

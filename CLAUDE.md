@@ -14,6 +14,8 @@ dokumen "Dyno Project OS — Rancangan Laravel".
 
 **Stack:** Laravel 13 · PHP 8.3+ · Livewire 4 + Blade · PostgreSQL 16 · Pest.
 **Tiada build step / npm.** CSS dalam `public/css/dyno.css` (dipindah dari versi HTML).
+`package.json` hanya ada skrip `build` kosong supaya skrip deploy lalai Forge tidak gagal —
+jangan tambah kebergantungan. Deploy: `DEPLOY.md`. Syarikat produksi: `php artisan dyno:syarikat-baru`.
 
 **Bahasa: Bahasa Melayu.** Teks UI, nama jadual, medan, kelas dan kaedah domain dalam
 BM (`projek`, `bayaran`, `belanja`, `Kiraan::ringkasan()`). Kekalkan konvensyen ini.

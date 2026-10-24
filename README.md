@@ -33,4 +33,5 @@ php artisan serve
 Buka http://localhost:8000 dan log masuk dengan `pemilik@demo.test` / `password`
 (akaun demo tempatan sahaja; data demo ialah rekaan).
 
-Ujian: `php artisan test`. Lihat `CLAUDE.md` untuk seni bina dan peraturan.
+Ujian: `php artisan test`. Lihat `CLAUDE.md` untuk seni bina dan peraturan,
+dan `DEPLOY.md` untuk deploy ke Laravel Forge.
