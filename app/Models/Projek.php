@@ -52,6 +52,22 @@ class Projek extends Model
         $this->staf()->syncWithoutDetaching([$user->id => ['syarikat_id' => $this->syarikat_id]]);
     }
 
+    /**
+     * Rekod bayaran oleh $oleh. Staf (bukan pengurusan) SENTIASA direkod sebagai Menunggu —
+     * pengurus sahkan kemudian. Dikuatkuasa di sini supaya setiap borang ikut peraturan sama.
+     *
+     * @param  array{jenis: string, amaun: mixed, tarikh?: ?string, kaedah?: ?string, ruj?: ?string, status?: string}  $data
+     */
+    public function rekodBayaran(User $oleh, array $data): Bayaran
+    {
+        $status = $oleh->peranan()?->pengurusan() ? ($data['status'] ?? Bayaran::DITERIMA) : Bayaran::MENUNGGU;
+
+        return $this->bayaran()->create([
+            'jenis' => $data['jenis'], 'amaun' => $data['amaun'], 'tarikh' => ($data['tarikh'] ?? null) ?: null,
+            'kaedah' => (string) ($data['kaedah'] ?? ''), 'ruj' => (string) ($data['ruj'] ?? ''), 'status' => $status,
+        ]);
+    }
+
     /** "siap" | "jalan" | "pending" — lihat Kiraan::jenisStatus(). */
     public function jenisStatus(): string
     {

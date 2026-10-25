@@ -77,13 +77,8 @@ class ButiranProjek extends Component
             'b.status' => ['required', 'in:Diterima,Menunggu'],
         ])['b'];
 
-        // Staf hanya boleh merekod sebagai Menunggu — pengurus sahkan kemudian.
-        // Dikuatkuasa di sini (pelayan), bukan dengan menyembunyikan pilihan dalam borang.
-        if (! auth()->user()->peranan()?->pengurusan()) {
-            $data['status'] = Bayaran::MENUNGGU;
-        }
-
-        $this->projek->bayaran()->create([...$data, 'kaedah' => (string) $data['kaedah'], 'ruj' => (string) $data['ruj']]);
+        // Staf dipaksa Menunggu di pelayan (Projek::rekodBayaran), bukan sekadar disorok dalam borang.
+        $this->projek->rekodBayaran(auth()->user(), $data);
         $this->rekod = null;
     }
 

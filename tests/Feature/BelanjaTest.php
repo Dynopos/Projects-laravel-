@@ -84,3 +84,8 @@ it('menu Perbelanjaan ada di sidebar dan kad Baki Terkini dashboard memautnya', 
     $this->actingAs($this->pemilik)->get(urlSyarikat($this->s))
         ->assertSee('Perbelanjaan')->assertSee(urlSyarikat($this->s, '/perbelanjaan'), false);
 });
+
+it('butang padam dipapar kepada pemilik, tidak kepada akauntan', function () {
+    Livewire::actingAs($this->pemilik)->test(SenaraiBelanja::class)->assertSeeHtml('wire:click="padam(');
+    Livewire::actingAs(ahli($this->s, Peranan::Akauntan))->test(SenaraiBelanja::class)->assertDontSeeHtml('wire:click="padam(');
+});

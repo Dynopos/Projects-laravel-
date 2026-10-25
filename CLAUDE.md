@@ -146,6 +146,13 @@ DYNO_FAIL_PROJECT_FLOW="/laluan/PROJECT LISTING 2026 FCI.xls" php artisan test -
 # jangkaan: 10 projek · 16 bayaran · RM184,193.00 · RM83,861.00
 ```
 
+## Senarai merentas projek (Pembayaran, Perbelanjaan)
+
+- Tapis dengan `Projek::bolehDilihat($user)` — staf hanya projek yang ditugaskan.
+- Rekod bayaran **sentiasa** melalui `Projek::rekodBayaran()` (staf dipaksa Menunggu).
+- Bila eager-load projek dengan lajur terhad, **sertakan `syarikat_id`** — `ProjekPolicy`
+  menyemaknya; tanpanya semua `@can` jadi false dan butang Sahkan/Padam hilang senyap.
+
 ## Log aktiviti
 
 Tambah & baca sahaja. `CatatAktiviti` (observer) merekod setiap perubahan projek,
@@ -191,6 +198,7 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] Jemputan staf melalui e-mel, urus ahli (halaman Ahli & Jemputan)
 - [x] Tetapan syarikat: maklumat, awalan kod, zon waktu, logo, peringkat kerja, kategori perbelanjaan
 - [ ] Gambar resit (storan S3 peribadi + URL bertandatangan), eksport CSV
+- [x] Tab Pembayaran — semua bayaran, kotak Diterima/Deposit/Menunggu (sama dengan Dashboard), sahkan & padam
 - [x] Tab Perbelanjaan — semua projek, tapis projek/kategori, ringkasan kategori, rekod & padam
 - [x] Import Excel — PROJECT FLOW (`HuraiFlow`) + generik (`HuraiGenerik`), pratonton & amaran
 - [ ] Panel pentadbir (Filament), langganan + payment gateway

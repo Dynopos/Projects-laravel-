@@ -17,9 +17,9 @@
   <div class="seclab"><b>Pembayaran</b><span></span></div>
   <div class="tiles">
     <x-tile k="Total Payment" :v="$rm($r['jumlah_nilai'])" f="Nilai kontrak" :href="route('projek')" hero />
-    <x-tile k="Deposit Payment" :v="$rm($r['deposit'])" f="Deposit diterima" :href="route('projek')" />
+    <x-tile k="Deposit Payment" :v="$rm($r['deposit'])" f="Deposit diterima" :href="route('bayaran', ['jenis' => 'deposit', 'status' => 'Diterima'])" />
     <x-tile k="Pending Payment" :v="$rm($r['tertunggak'])" f="Belum dikutip" :href="route('projek', ['susun' => 'baki'])" />
-    <x-tile k="Received Payment" :v="$rm($r['diterima'])" f="Telah diterima" :href="route('projek')" />
+    <x-tile k="Received Payment" :v="$rm($r['diterima'])" f="Telah diterima" :href="route('bayaran', ['status' => 'Diterima'])" />
   </div>
 
   @if($menunggu->isNotEmpty())
