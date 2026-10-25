@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EksportController;
 use App\Http\Controllers\JemputanController;
 use App\Http\Controllers\LogoController;
 use App\Http\Controllers\SesiController;
@@ -40,5 +41,6 @@ Route::middleware('syarikat')->group(function () {
         Route::livewire('/ahli', UrusAhli::class)->name('ahli');
         Route::livewire('/tetapan', TetapanSyarikat::class)->name('tetapan');
         Route::livewire('/import', ImportExcel::class)->name('import');
+        Route::get('/eksport/{jenis}.{format}', EksportController::class)->name('eksport')->middleware('throttle:30,1');
     });
 });

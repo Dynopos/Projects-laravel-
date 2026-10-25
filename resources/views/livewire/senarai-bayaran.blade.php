@@ -2,9 +2,10 @@
 <div>
   <div class="head">
     <div><h1>Pembayaran</h1><p>Semua bayaran klien merentas projek. Bayaran <b>Menunggu</b> tidak dikira dalam baki sehingga disahkan.</p></div>
-    @if($projekRekod->isNotEmpty())
-      <div class="acts"><button class="btn p" wire:click="bukaBorang">+ Bayaran</button></div>
-    @endif
+    <div class="acts">
+      <x-butang-eksport jenis="bayaran" :tapisan="['projek' => $projek, 'status' => $status, 'jenis' => $jenis]" />
+      @if($projekRekod->isNotEmpty())<button class="btn p" wire:click="bukaBorang">+ Bayaran</button>@endif
+    </div>
   </div>
 
   @if($borangBuka)

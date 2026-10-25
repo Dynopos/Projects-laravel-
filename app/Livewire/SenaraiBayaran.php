@@ -109,7 +109,7 @@ class SenaraiBayaran extends Component
         $menunggu = $kumpulan->where('status', Bayaran::MENUNGGU);
         $deposit = $diterima->filter(fn ($r) => preg_match(Kiraan::REGEX_DEPOSIT, (string) $r->jenis));
 
-        $senarai = $tapis->with('projek:id,syarikat_id,kod,nama')->orderByDesc('tarikh')->orderByDesc('id')->get();
+        $senarai = $tapis->with('projek:id,syarikat_id,kod,nama')->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get();
         if ($this->jenis === 'deposit') {
             $senarai = $senarai->filter(fn ($b) => preg_match(Kiraan::REGEX_DEPOSIT, (string) $b->jenis))->values();
         }

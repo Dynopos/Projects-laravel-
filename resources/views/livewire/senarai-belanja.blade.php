@@ -2,9 +2,10 @@
 <div>
   <div class="head">
     <div><h1>Perbelanjaan</h1><p>Setiap ringgit keluar, ikut projek dan kategori.</p></div>
-    @if($projekRekod->isNotEmpty())
-      <div class="acts"><button class="btn p" wire:click="bukaBorang">+ Perbelanjaan</button></div>
-    @endif
+    <div class="acts">
+      <x-butang-eksport jenis="belanja" :tapisan="['projek' => $projek, 'kategori' => $kategori]" />
+      @if($projekRekod->isNotEmpty())<button class="btn p" wire:click="bukaBorang">+ Perbelanjaan</button>@endif
+    </div>
   </div>
 
   @if($borangBuka)

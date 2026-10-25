@@ -153,6 +153,17 @@ DYNO_FAIL_PROJECT_FLOW="/laluan/PROJECT LISTING 2026 FCI.xls" php artisan test -
 - Bila eager-load projek dengan lajur terhad, **sertakan `syarikat_id`** — `ProjekPolicy`
   menyemaknya; tanpanya semua `@can` jadi false dan butang Sahkan/Padam hilang senyap.
 
+## Eksport — `App\Support\Laporan` + `EksportController`
+
+`/eksport/{projek|arkib|bayaran|belanja}.{csv|pdf}` dengan tapisan query string yang sama
+dengan halaman. Pemilik, pengurus, akauntan (`Peranan::bolehEksport()`); setiap eksport dilog.
+
+- CSV: BOM UTF-8, amaun nombor biasa `1234.50` (Excel boleh jumlah), sel bermula
+  `= + - @` diberi `'` (suntikan formula).
+- PDF: DomPDF, A4 landskap, cetakan putih, `isFontSubsettingEnabled` (~30 KB).
+- Susunan tarikh: `orderByRaw('tarikh is null, tarikh desc')` — PostgreSQL & SQLite
+  meletakkan NULL berbeza untuk DESC.
+
 ## Log aktiviti
 
 Tambah & baca sahaja. `CatatAktiviti` (observer) merekod setiap perubahan projek,
@@ -197,7 +208,8 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
   Baki Terkini, projek/arkib, butiran projek dengan bayaran & perbelanjaan, log aktiviti, 40 ujian
 - [x] Jemputan staf melalui e-mel, urus ahli (halaman Ahli & Jemputan)
 - [x] Tetapan syarikat: maklumat, awalan kod, zon waktu, logo, peringkat kerja, kategori perbelanjaan
-- [ ] Gambar resit (storan S3 peribadi + URL bertandatangan), eksport CSV
+- [x] Eksport CSV & PDF — projek, projek siap, pembayaran, perbelanjaan (ikut tapisan skrin)
+- [ ] Gambar resit (ditangguhkan atas permintaan pemilik)
 - [x] Tab Pembayaran — semua bayaran, kotak Diterima/Deposit/Menunggu (sama dengan Dashboard), sahkan & padam
 - [x] Tab Perbelanjaan — semua projek, tapis projek/kategori, ringkasan kategori, rekod & padam
 - [x] Import Excel — PROJECT FLOW (`HuraiFlow`) + generik (`HuraiGenerik`), pratonton & amaran

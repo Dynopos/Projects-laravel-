@@ -108,3 +108,8 @@ it('butang Sahkan dan padam dipapar kepada pemilik, tidak kepada akauntan', func
     Livewire::actingAs(ahli($this->s, Peranan::Akauntan))->test(SenaraiBayaran::class)
         ->assertDontSeeHtml('wire:click="sahkan(')->assertDontSeeHtml('wire:click="padam(');
 });
+
+it('bayaran tanpa tarikh disusun di bawah (sama di SQLite dan PostgreSQL)', function () {
+    $this->a->bayaran()->update(['tarikh' => '2026-01-01']);
+    Livewire::actingAs($this->pemilik)->test(SenaraiBayaran::class)->assertSeeInOrder(['RUJ-A1', 'RUJ-B1']);
+});

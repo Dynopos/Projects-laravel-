@@ -125,8 +125,8 @@ class ButiranProjek extends Component
 
         return view('livewire.butiran-projek', [
             'p' => $p,
-            'bayaran' => $this->projek->bayaran()->orderByDesc('tarikh')->orderByDesc('id')->get(),
-            'belanja' => $this->projek->belanja()->with('perekod')->orderByDesc('tarikh')->orderByDesc('id')->get(),
+            'bayaran' => $this->projek->bayaran()->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get(),
+            'belanja' => $this->projek->belanja()->with('perekod')->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get(),
             'peringkat' => PeringkatAliran::orderBy('susunan')->get(),
             'kategori' => KategoriBelanja::orderBy('susunan')->pluck('nama'),
             'bolehUrus' => $user->can('update', $this->projek),

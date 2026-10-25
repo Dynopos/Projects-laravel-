@@ -5,9 +5,10 @@
       <h1>{{ $arkib ? 'Projek Siap' : 'Projek' }}</h1>
       <p>{{ $arkib ? 'Projek yang sudah siap, disimpan berasingan.' : 'Projek aktif — baru, dalam progres dan tertunda.' }}</p>
     </div>
-    @if($bolehCipta && ! $arkib)
-      <div class="acts"><button class="btn p" wire:click="bukaBorang">+ Projek baharu</button></div>
-    @endif
+    <div class="acts">
+      <x-butang-eksport :jenis="$arkib ? 'arkib' : 'projek'" :tapisan="['q' => $q, 'kat' => $kat, 'susun' => $susun]" />
+      @if($bolehCipta && ! $arkib)<button class="btn p" wire:click="bukaBorang">+ Projek baharu</button>@endif
+    </div>
   </div>
 
   @if($borangBuka)

@@ -99,7 +99,7 @@ class SenaraiBelanja extends Component
         $pilihan = $this->projek !== '' ? $semuaProjek->firstWhere('id', (int) $this->projek) : null;
 
         return view('livewire.senarai-belanja', [
-            'senarai' => (clone $q)->with(['projek:id,syarikat_id,kod,nama', 'perekod:id,name'])->orderByDesc('tarikh')->orderByDesc('id')->paginate(30),
+            'senarai' => (clone $q)->with(['projek:id,syarikat_id,kod,nama', 'perekod:id,name'])->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->paginate(30),
             'projekSemua' => $semuaProjek,
             'projekRekod' => $semuaProjek->filter(fn ($p) => $user->can('rekod', $p))->values(),
             'kategoriSemua' => KategoriBelanja::orderBy('susunan')->pluck('nama'),
