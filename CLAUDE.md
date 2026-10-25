@@ -6,7 +6,7 @@ Baca dahulu sebelum ubah apa-apa.
 
 **Dyno Project OS** versi Laravel — sistem projek & pembayaran untuk kontraktor dan
 pemaju, dijual sebagai SaaS multi-syarikat. Setiap pelanggan log masuk ke ruang
-syarikat sendiri (`<subdomain>.dynoprojectos.my` atau domain sendiri).
+syarikat sendiri (`<subdomain>.dynoproject.my` atau domain sendiri).
 
 Versi HTML + Supabase (repo `Dynopos/ProjectOs`, dan `FCmanagement` untuk Fine
 Cabinetry) kekal sebagai **rujukan reka bentuk dan peraturan kiraan**. Rancangan penuh:

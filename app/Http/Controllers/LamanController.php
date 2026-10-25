@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 /**
- * Laman awam di domain utama (dynoprojectos.my): landing page, robots.txt, sitemap.
+ * Laman awam di domain utama (dynoproject.my): landing page, robots.txt, sitemap.
  * Ruang syarikat (subdomain) tidak melalui pengawal ini.
  */
 class LamanController extends Controller
