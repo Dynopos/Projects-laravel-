@@ -8,6 +8,13 @@
   <meta name="theme-color" content="#0a0a09">
   <title>{{ $tajuk ?? 'Dashboard' }} · {{ $syarikat->namaPenuh() }}</title>
   <link rel="stylesheet" href="{{ asset('css/dyno.css') }}">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Dyno">
+  <meta name="robots" content="noindex, nofollow">
   <script>try{if(localStorage.getItem('tema')==='light')document.documentElement.dataset.t='light'}catch(e){}</script>
   @livewireStyles
 </head>

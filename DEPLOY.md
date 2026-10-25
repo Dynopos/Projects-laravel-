@@ -36,6 +36,7 @@ DB_PASSWORD=...
 DYNO_DOMAIN=dynoprojectos.my   # syarikat = <subdomain>.dynoprojectos.my
 DYNO_SYARIKAT_LALAI=           # KOSONG di produksi
 DYNO_CAKERA=local              # logo; tukar ke s3 bila storan objek disediakan
+DYNO_WHATSAPP=60123456789      # butang "Minta demo" di landing page (atau DYNO_EMEL=...)
 
 MAIL_MAILER=smtp               # Postmark / SES / Mailgun — perlu untuk e-mel jemputan
 MAIL_FROM_ADDRESS="noreply@dynoprojectos.my"
@@ -65,6 +66,8 @@ $FORGE_PHP artisan optimize
 Setiap syarikat ialah subdomain, jadi perlukan:
 
 - DNS: rekod `A` untuk `dynoprojectos.my` **dan** `*.dynoprojectos.my` → IP server.
+  `dynoprojectos.my` memaparkan **landing page** (robots.txt boleh diindeks + sitemap.xml);
+  `www.` diubah hala 301 ke domain utama; setiap subdomain syarikat ialah app (noindex).
 - Forge: tambah `*.dynoprojectos.my` sebagai alias site.
 - SSL wildcard: Let's Encrypt wildcard perlukan pengesahan DNS (Forge sokong melalui API
   penyedia DNS, cth Cloudflare).
@@ -83,6 +86,12 @@ php artisan dyno:syarikat-baru "FINE CABINETRY" finecabinetry pemilik@contoh.my 
 
 Pemilik menerima e-mel jemputan; arahan itu juga memaparkan pautan jemputan (sah 7 hari)
 jika e-mel belum disediakan. Selepas pemilik masuk, dia jemput staf dari **Ahli & Jemputan**.
+
+## Selepas landing page hidup (SEO)
+
+1. Daftar `https://dynoprojectos.my` dalam Google Search Console dan hantar `/sitemap.xml`.
+2. Semak data berstruktur dengan Rich Results Test (FAQ + SoftwareApplication).
+3. Kongsi pautan di WhatsApp/Facebook untuk semak imej pratonton (og.jpg).
 
 ## Bila deploy gagal
 

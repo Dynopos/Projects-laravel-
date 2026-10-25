@@ -9,6 +9,12 @@ return [
     // Kosongkan dalam produksi.
     'syarikat_lalai' => env('DYNO_SYARIKAT_LALAI'),
 
+    // Hubungi kami — butang "Minta demo" di landing page. Kosong = butang menatal ke "Cara mula".
+    'hubungi' => [
+        'whatsapp' => env('DYNO_WHATSAPP'),   // cth 60123456789 (tanpa + atau sengkang)
+        'emel' => env('DYNO_EMEL'),
+    ],
+
     // Cakera untuk fail syarikat (logo; kelak resit). Produksi: s3 (R2/Spaces), peribadi.
     'cakera' => env('DYNO_CAKERA', 'local'),
 

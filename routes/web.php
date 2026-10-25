@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EksportController;
 use App\Http\Controllers\JemputanController;
+use App\Http\Controllers\LamanController;
 use App\Http\Controllers\LogoController;
 use App\Http\Controllers\SesiController;
 use App\Livewire\ButiranProjek;
@@ -14,6 +15,20 @@ use App\Livewire\SenaraiProjek;
 use App\Livewire\TetapanSyarikat;
 use App\Livewire\UrusAhli;
 use Illuminate\Support\Facades\Route;
+
+// Laman awam di domain utama. Didaftar DAHULU supaya hos domain utama tidak jatuh ke
+// kumpulan syarikat di bawah (yang memulangkan 404 untuk hos tanpa syarikat).
+$utama = config('dyno.domain_utama');
+Route::domain($utama)->group(function () {
+    Route::get('/', [LamanController::class, 'utama'])->name('laman');
+    Route::get('/robots.txt', fn () => app(LamanController::class)->robots(true));
+    Route::get('/sitemap.xml', [LamanController::class, 'sitemap'])->name('sitemap');
+});
+Route::domain('www.'.$utama)->group(function () {
+    Route::get('/{laluan?}', fn () => redirect()->away(LamanController::url(request()->path() === '/' ? '/' : request()->path()), 301))->where('laluan', '.*');
+});
+// Ruang syarikat tidak boleh diindeks enjin carian.
+Route::get('/robots.txt', fn () => app(LamanController::class)->robots(false));
 
 // Semua laluan app berada di bawah satu syarikat (dari subdomain / domain pelanggan).
 Route::middleware('syarikat')->group(function () {

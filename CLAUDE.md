@@ -164,6 +164,21 @@ dengan halaman. Pemilik, pengurus, akauntan (`Peranan::bolehEksport()`); setiap 
 - Susunan tarikh: `orderByRaw('tarikh is null, tarikh desc')` — PostgreSQL & SQLite
   meletakkan NULL berbeza untuk DESC.
 
+## Landing page — domain utama
+
+`Route::domain(config('dyno.domain_utama'))` didaftar **sebelum** kumpulan syarikat →
+`LamanController` (`/`, `/robots.txt`, `/sitemap.xml`); `www.` → 301. Hos lain = app.
+Paparan `resources/views/laman/utama.blade.php` + `public/css/laman.css` (berasingan dari app).
+
+- SEO: satu `<h1>` dengan kata kunci "sistem pengurusan projek kontraktor", `<x-seo.meta>`,
+  JSON-LD (Organization, SoftwareApplication, FAQPage). Soalan lazim ditulis SEKALI dalam
+  `$soalan` — paparan dan FAQPage mesti sama.
+- Kunci JSON-LD `@context`/`@type` dibina dengan `"\x40"` — Blade menukar `@context` dalam
+  templat kepada arahan.
+- Ruang syarikat: `robots.txt` = Disallow, dan halaman app ada `noindex`.
+- Butang "Minta demo": `DYNO_WHATSAPP` → `DYNO_EMEL` → `#mula`.
+- Jangan tulis ciri yang belum wujud di landing page (gambar resit, invois, WhatsApp = dirancang).
+
 ## Log aktiviti
 
 Tambah & baca sahaja. `CatatAktiviti` (observer) merekod setiap perubahan projek,
@@ -209,6 +224,7 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] Jemputan staf melalui e-mel, urus ahli (halaman Ahli & Jemputan)
 - [x] Tetapan syarikat: maklumat, awalan kod, zon waktu, logo, peringkat kerja, kategori perbelanjaan
 - [x] Eksport CSV & PDF — projek, projek siap, pembayaran, perbelanjaan (ikut tapisan skrin)
+- [x] Landing page di domain utama (SEO, OG, sitemap) + manifest PWA
 - [ ] Gambar resit (ditangguhkan atas permintaan pemilik)
 - [x] Tab Pembayaran — semua bayaran, kotak Diterima/Deposit/Menunggu (sama dengan Dashboard), sahkan & padam
 - [x] Tab Perbelanjaan — semua projek, tapis projek/kategori, ringkasan kategori, rekod & padam
