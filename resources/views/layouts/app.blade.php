@@ -21,6 +21,7 @@
     <a href="{{ route('dashboard') }}" wire:navigate @class(['on' => request()->routeIs('dashboard')])><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg> Dashboard</a>
     <a href="{{ route('projek') }}" wire:navigate @class(['on' => request()->routeIs('projek', 'projek.butiran')])><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Projek</a>
     <a href="{{ route('arkib') }}" wire:navigate @class(['on' => request()->routeIs('arkib')])><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1.5"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12h4"/></svg> Projek Siap</a>
+    <a href="{{ route('belanja') }}" wire:navigate @class(['on' => request()->routeIs('belanja')])><svg viewBox="0 0 24 24"><path d="M4 7a2 2 0 012-2h11v4"/><path d="M4 7v11a2 2 0 002 2h13V9H6a2 2 0 01-2-2z"/><circle cx="16" cy="14.5" r="1.3"/></svg> Perbelanjaan</a>
     @if($u->peranan() !== \App\Enums\Peranan::Staf)
       <div class="navlab" style="margin-top:16px">DATA</div>
       @if($u->peranan()?->pengurusan())

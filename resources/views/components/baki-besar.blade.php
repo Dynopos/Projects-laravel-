@@ -1,7 +1,7 @@
-@props(['masuk', 'keluar', 'nilai', 'label' => 'semua projek'])
+@props(['masuk', 'keluar', 'nilai', 'label' => 'semua projek', 'href' => null])
 {{-- Angka paling penting dalam sistem, jadi paling besar. Sama seperti bakiBesar() versi HTML. --}}
 @php($baki = $masuk - $keluar)
-<div class="baki-besar">
+@if($href)<a class="baki-besar" href="{{ $href }}" wire:navigate style="text-decoration:none" title="Lihat perbelanjaan">@else<div class="baki-besar">@endif
   <div class="lab">Baki terkini · {{ $label }}</div>
   <div class="angka">{{ \App\Support\Kiraan::rm($baki) }}</div>
   <div class="cap">
@@ -13,4 +13,4 @@
     <div><small>Belum dikutip</small><b>{{ \App\Support\Kiraan::rm(max(0, $nilai - $masuk)) }}</b></div>
     <div><small>Untung kasar semasa</small><b>{{ \App\Support\Kiraan::rm($nilai - $keluar) }}</b></div>
   </div>
-</div>
+@if($href)</a>@else</div>@endif

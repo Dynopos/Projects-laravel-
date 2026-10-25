@@ -191,6 +191,7 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] Jemputan staf melalui e-mel, urus ahli (halaman Ahli & Jemputan)
 - [x] Tetapan syarikat: maklumat, awalan kod, zon waktu, logo, peringkat kerja, kategori perbelanjaan
 - [ ] Gambar resit (storan S3 peribadi + URL bertandatangan), eksport CSV
+- [x] Tab Perbelanjaan — semua projek, tapis projek/kategori, ringkasan kategori, rekod & padam
 - [x] Import Excel — PROJECT FLOW (`HuraiFlow`) + generik (`HuraiGenerik`), pratonton & amaran
 - [ ] Panel pentadbir (Filament), langganan + payment gateway
 - [ ] PWA, masa nyata (Reverb)

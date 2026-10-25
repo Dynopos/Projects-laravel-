@@ -4,7 +4,7 @@
     <div><h1>Dashboard</h1><p>Semua projek dan pembayaran dalam satu pandangan.</p></div>
   </div>
 
-  <x-baki-besar :masuk="$r['diterima']" :keluar="$r['belanja']" :nilai="$r['jumlah_nilai']" />
+  <x-baki-besar :masuk="$r['diterima']" :keluar="$r['belanja']" :nilai="$r['jumlah_nilai']" :href="route('belanja')" />
 
   <div class="seclab"><b>Projek</b><span></span></div>
   <div class="tiles">

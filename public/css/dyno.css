@@ -393,3 +393,10 @@ code{background:var(--field);padding:1px 6px;border-radius:5px;font-size:12.5px;
   .tile,.btn,.tile.hero::after,.baki-besar::after{transition:none}
   .tile:hover{transform:none}
 }
+
+/* Baris "Ikut kategori" (Perbelanjaan): label · bar · amaun · %; di telefon bar turun ke baris sendiri */
+.kat-baris{display:grid;grid-template-columns:150px minmax(0,1fr) 130px 54px;gap:12px;align-items:center;margin-top:10px}
+@media(max-width:640px){
+  .kat-baris{grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px;margin-top:14px}
+  .kat-baris .kat-bar{grid-column:1/-1;grid-row:2}
+}

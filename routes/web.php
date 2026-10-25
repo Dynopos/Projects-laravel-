@@ -7,6 +7,7 @@ use App\Livewire\ButiranProjek;
 use App\Livewire\Dashboard;
 use App\Livewire\ImportExcel;
 use App\Livewire\LogAktivitiSenarai;
+use App\Livewire\SenaraiBelanja;
 use App\Livewire\SenaraiProjek;
 use App\Livewire\TetapanSyarikat;
 use App\Livewire\UrusAhli;
@@ -32,6 +33,7 @@ Route::middleware('syarikat')->group(function () {
         Route::livewire('/projek', SenaraiProjek::class)->name('projek');
         Route::livewire('/projek-siap', SenaraiProjek::class)->name('arkib')->defaults('arkib', true);
         Route::livewire('/projek/{projek}', ButiranProjek::class)->name('projek.butiran');
+        Route::livewire('/perbelanjaan', SenaraiBelanja::class)->name('belanja');
         Route::livewire('/log', LogAktivitiSenarai::class)->name('log');
         Route::livewire('/ahli', UrusAhli::class)->name('ahli');
         Route::livewire('/tetapan', TetapanSyarikat::class)->name('tetapan');
