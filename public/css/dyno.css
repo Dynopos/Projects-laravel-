@@ -400,3 +400,7 @@ code{background:var(--field);padding:1px 6px;border-radius:5px;font-size:12.5px;
   .kat-baris{grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px;margin-top:14px}
   .kat-baris .kat-bar{grid-column:1/-1;grid-row:2}
 }
+
+/* Tiga kotak (Pembayaran) — satu lajur di telefon; gaya sebaris dulu mengatasi susunan telefon */
+.tiles.tiga{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:820px){.tiles.tiga{grid-template-columns:1fr}}

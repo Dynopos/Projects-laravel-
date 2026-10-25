@@ -113,3 +113,8 @@ it('bayaran tanpa tarikh disusun di bawah (sama di SQLite dan PostgreSQL)', func
     $this->a->bayaran()->update(['tarikh' => '2026-01-01']);
     Livewire::actingAs($this->pemilik)->test(SenaraiBayaran::class)->assertSeeInOrder(['RUJ-A1', 'RUJ-B1']);
 });
+
+it('kotak Pembayaran guna kelas (bukan gaya sebaris) supaya satu lajur di telefon', function () {
+    Livewire::actingAs($this->pemilik)->test(SenaraiBayaran::class)
+        ->assertSeeHtml('class="tiles tiga"')->assertDontSeeHtml('grid-template-columns:repeat(3');
+});
