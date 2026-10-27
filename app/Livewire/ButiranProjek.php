@@ -132,6 +132,10 @@ class ButiranProjek extends Component
             'bolehUrus' => $user->can('update', $this->projek),
             'bolehRekod' => $user->can('rekod', $this->projek),
             'pengurusan' => (bool) $user->peranan()?->pengurusan(),
+            'bolehUntung' => (bool) $user->peranan()?->bolehEksport(),
+            'belanjaKategori' => $this->projek->belanja()->selectRaw('kategori, sum(amaun) as jumlah, count(*) as n')
+                ->groupBy('kategori')->get()->map(fn ($r) => ['nama' => $r->kategori, 'sen' => Kiraan::sen($r->jumlah), 'n' => (int) $r->n])
+                ->sortByDesc('sen')->values(),
         ])->title($this->projek->kod);
     }
 }

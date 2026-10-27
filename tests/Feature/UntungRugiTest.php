@@ -2,6 +2,7 @@
 
 use App\Enums\Peranan;
 use App\Livewire\LaporanUntungRugi;
+use App\Livewire\SenaraiBelanja;
 use App\Models\Projek;
 use App\Support\UntungRugi;
 use Livewire\Livewire;
@@ -82,4 +83,29 @@ it('eksport CSV untung rugi projek dan bulanan', function () {
 
     $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/eksport/pnl.pdf'))->assertOk()->assertHeader('Content-Type', 'application/pdf');
     $this->actingAs(ahli($this->s, Peranan::Staf))->get(urlSyarikat($this->s, '/eksport/pnl.csv'))->assertForbidden();
+});
+
+it('butiran projek papar untung rugi projek dan perbelanjaan ikut kategori (bukan untuk staf)', function () {
+    $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/projek/'.$this->b->id))->assertOk()
+        ->assertSee('Untung rugi projek')->assertSee('Projek ini rugi')->assertSee('−30.0%')
+        ->assertSee('Perbelanjaan ikut kategori')->assertSee('130% daripada nilai kontrak');
+
+    semasa()->tetapkan($this->s);     // middleware mengosongkan syarikat selepas permintaan; RLS perlukannya
+    $staf = ahli($this->s, Peranan::Staf);
+    $this->b->staf()->attach($staf->id, ['syarikat_id' => $this->s->id]);
+    $this->actingAs($staf)->get(urlSyarikat($this->s, '/projek/'.$this->b->id))->assertOk()->assertDontSee('Untung rugi projek');
+});
+
+it('perbelanjaan: paparan ikut projek, tapis kategori, klik projek ke senarai', function () {
+    Livewire::actingAs($this->pemilik)->test(SenaraiBelanja::class)
+        ->set('projek', (string) $this->a->id)
+        ->set('paparan', 'projek')->assertSet('projek', '')
+        ->assertSeeInOrder(['PRJ-01', 'RM7,000.00', 'PRJ-02', 'RM6,500.00'])->assertSee('Untung dijangka')
+        ->set('kategori', 'Material')->assertSee('RM6,000.00')->assertSee('RM2,000.00')
+        ->call('pilihProjek', $this->b->id)->assertSet('paparan', 'senarai')->assertSet('projek', (string) $this->b->id);
+
+    $staf = ahli($this->s, Peranan::Staf);
+    $this->a->staf()->attach($staf->id, ['syarikat_id' => $this->s->id]);
+    Livewire::actingAs($staf)->test(SenaraiBelanja::class)->set('paparan', 'projek')
+        ->assertSee('PRJ-01')->assertDontSee('PRJ-02')->assertDontSee('Untung dijangka');
 });

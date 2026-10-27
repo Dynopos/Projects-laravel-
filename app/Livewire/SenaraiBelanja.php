@@ -6,6 +6,7 @@ use App\Models\Belanja;
 use App\Models\KategoriBelanja;
 use App\Models\Projek;
 use App\Support\Kiraan;
+use App\Support\UntungRugi;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -28,13 +29,20 @@ class SenaraiBelanja extends Component
     #[Url]
     public string $kategori = '';
 
+    /** senarai | projek — "Ikut projek" meringkaskan perbelanjaan & untung setiap projek. */
+    #[Url]
+    public string $paparan = 'senarai';
+
     public bool $borangBuka = false;
 
     public array $bl = [];
 
     public function updated($medan): void
     {
-        if (in_array($medan, ['projek', 'kategori'], true)) {
+        if ($medan === 'paparan' && $this->paparan === 'projek') {
+            $this->projek = '';     // jadual ikut projek sentiasa merangkumi semua projek
+        }
+        if (in_array($medan, ['projek', 'kategori', 'paparan'], true)) {
             $this->resetPage();
         }
     }
@@ -71,6 +79,14 @@ class SenaraiBelanja extends Component
         $this->borangBuka = false;
     }
 
+    /** Klik projek dalam paparan "Ikut projek" → senarai perbelanjaan projek itu. */
+    public function pilihProjek(int $id): void
+    {
+        $this->projek = (string) $id;
+        $this->paparan = 'senarai';
+        $this->resetPage();
+    }
+
     public function padam(int $id): void
     {
         $x = Belanja::whereIn('projek_id', $this->projekDilihat()->select('id'))->findOrFail($id);
@@ -98,6 +114,18 @@ class SenaraiBelanja extends Component
 
         $pilihan = $this->projek !== '' ? $semuaProjek->firstWhere('id', (int) $this->projek) : null;
 
+        // Ikut projek: kategori yang ditapis menyempitkan perbelanjaan; untung sentiasa ikut semua kategori.
+        $ikutProjek = collect();
+        if ($this->paparan === 'projek') {
+            $perKategori = (clone $q)->selectRaw('projek_id, sum(amaun) as jumlah, count(*) as n')->groupBy('projek_id')->get()->keyBy('projek_id');
+            $ikutProjek = UntungRugi::perProjek($this->projekDilihat(), 'belanja')
+                ->each(function ($p) use ($perKategori) {
+                    $p->belanja_tapis = Kiraan::sen($perKategori[$p->id]->jumlah ?? 0);
+                    $p->rekod = (int) ($perKategori[$p->id]->n ?? 0);
+                })
+                ->sortByDesc('belanja_tapis')->values();
+        }
+
         return view('livewire.senarai-belanja', [
             'senarai' => (clone $q)->with(['projek:id,syarikat_id,kod,nama', 'perekod:id,name'])->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->paginate(30),
             'projekSemua' => $semuaProjek,
@@ -109,6 +137,8 @@ class SenaraiBelanja extends Component
             'keluar' => $jumlah->sum('belanja_sen'),
             'nilai' => $jumlah->sum('nilai_sen'),
             'label' => $pilihan ? "{$pilihan->kod} — {$pilihan->nama}" : 'semua projek',
+            'ikutProjek' => $ikutProjek,
+            'bolehUntung' => (bool) $user->peranan()?->bolehEksport(),
         ]);
     }
 

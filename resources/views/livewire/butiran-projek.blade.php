@@ -72,6 +72,34 @@
     @if($p->nota)<p style="margin:14px 0 0;color:var(--ink2)">{{ $p->nota }}</p>@endif
   </div>
 
+  @if($bolehUntung)
+    @php($untungTunai = $p->diterima_sen - $p->belanja_sen)
+    @php($untungJangka = $p->nilai_sen - $p->belanja_sen)
+    @php($margin = \App\Support\UntungRugi::margin($untungJangka, $p->nilai_sen))
+    @php($jumlahBelanja = $belanjaKategori->sum('sen'))
+    <div class="seclab"><b>Untung rugi projek</b><span></span><a href="{{ route('pnl') }}" wire:navigate style="font-size:12px;color:var(--biru)">Semua projek →</a></div>
+    <div class="tiles tiga">
+      <x-tile k="Untung tunai" :v="\App\Support\Kiraan::rm($untungTunai)" f="Diterima − perbelanjaan" />
+      <x-tile k="Untung dijangka" :v="\App\Support\Kiraan::rm($untungJangka)" f="Nilai kontrak − perbelanjaan" hero />
+      <x-tile k="Margin dijangka" :v="\App\Support\UntungRugi::teksMargin($margin)" :f="$untungJangka < 0 ? 'Projek ini rugi' : 'Untung ÷ nilai kontrak'" />
+    </div>
+    @if($belanjaKategori->isNotEmpty())
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch"><h2>Perbelanjaan ikut kategori</h2><b>{{ $rm($jumlahBelanja) }}</b></div>
+        <p class="cap">{{ $belanjaKategori->sum('n') }} rekod · {{ $p->nilai_sen > 0 ? round($jumlahBelanja / $p->nilai_sen * 100, 1) : 0 }}% daripada nilai kontrak</p>
+        @foreach($belanjaKategori as $k)
+          @php($pc = $jumlahBelanja > 0 ? round($k['sen'] / $jumlahBelanja * 100, 1) : 0)
+          <div class="kat-baris">
+            <span class="tag">{{ $k['nama'] }}</span>
+            <div class="prog kat-bar" style="min-width:0"><div class="b"><i style="width:{{ $pc }}%"></i></div></div>
+            <span class="num" style="text-align:right">{{ $rm($k['sen']) }}</span>
+            <small style="color:var(--muted);text-align:right">{{ $pc }}%</small>
+          </div>
+        @endforeach
+      </div>
+    @endif
+  @endif
+
   <div class="seclab"><b>Bayaran</b><span></span><small>{{ $bayaran->count() }} rekod</small></div>
   <div class="tbl" style="margin-bottom:16px"><table>
     <thead><tr><th>Tarikh</th><th>Jenis</th><th>Kaedah · Rujukan</th><th>Status</th><th class="num">Amaun</th><th></th></tr></thead>

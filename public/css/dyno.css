@@ -436,3 +436,8 @@ tr.redup td{color:var(--muted)}
 .pnl-projek td:first-child .tag{display:inline-flex;margin-top:5px}
 .pnl-projek th,.pnl-projek td{padding-left:10px;padding-right:10px}
 .pnl-projek td.num{font-size:13px}
+.seg{display:inline-flex;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+.seg button{border:0;background:none;color:var(--ink2);font:600 13px var(--font);padding:8px 16px;border-radius:999px;cursor:pointer;min-height:36px}
+.seg button.on{background:var(--brand-soft);color:var(--ink)}
+tr.baris-klik{cursor:pointer}
+tr.baris-klik:hover td{background:var(--hover)}

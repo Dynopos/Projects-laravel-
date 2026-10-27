@@ -30,15 +30,53 @@
   <x-baki-besar :masuk="$masuk" :keluar="$keluar" :nilai="$nilai" :label="$label" />
 
   <div class="tabs">
+    <div class="seg" role="tablist" aria-label="Paparan">
+      <button type="button" role="tab" aria-selected="{{ $paparan === 'senarai' ? 'true' : 'false' }}" @class(['on' => $paparan === 'senarai']) wire:click="$set('paparan', 'senarai')">Semua rekod</button>
+      <button type="button" role="tab" aria-selected="{{ $paparan === 'projek' ? 'true' : 'false' }}" @class(['on' => $paparan === 'projek']) wire:click="$set('paparan', 'projek')">Ikut projek</button>
+    </div>
+    @if($paparan === 'senarai')
     <select class="field" style="max-width:340px" wire:model.live="projek">
       <option value="">Semua projek</option>
       @foreach($projekSemua as $p)<option value="{{ $p->id }}">{{ $p->kod }} — {{ $p->nama }}</option>@endforeach
     </select>
+    @endif
     <select class="field" style="max-width:220px" wire:model.live="kategori">
       <option value="">Semua kategori</option>
       @foreach($kategoriSemua as $k)<option>{{ $k }}</option>@endforeach
     </select>
   </div>
+
+  @if($paparan === 'projek')
+    <div class="tbl"><table @class(['pnl-projek' => $bolehUntung])>
+      <thead><tr><th>Projek</th><th class="num">Perbelanjaan{{ $kategori ? " · {$kategori}" : '' }}</th><th class="num">Rekod</th>
+        @if($bolehUntung)<th class="num">Diterima</th><th class="num">Untung tunai</th><th class="num">Nilai kontrak</th><th class="num">Untung dijangka</th><th class="num">Margin</th>@endif
+      </tr></thead>
+      <tbody>
+      @forelse($ikutProjek as $p)
+        <tr wire:key="ip-{{ $p->id }}" class="baris-klik" wire:click="pilihProjek({{ $p->id }})" title="Lihat perbelanjaan {{ $p->kod }}">
+          <td><b>{{ $p->kod }}</b><br><small style="color:var(--muted)">{{ $p->nama }}</small></td>
+          <td class="num"><b>{{ $rm($p->belanja_tapis) }}</b></td>
+          <td class="num">{{ $p->rekod }}</td>
+          @if($bolehUntung)
+            <td class="num">{{ $rm($p->diterima_sen) }}</td>
+            <td @class(['num', 'rugi' => $p->untung_tunai < 0])>{{ $rm($p->untung_tunai) }}</td>
+            <td class="num">{{ $rm($p->nilai_sen) }}</td>
+            <td @class(['num', 'rugi' => $p->untung_jangka < 0])><b>{{ $rm($p->untung_jangka) }}</b></td>
+            <td @class(['num', 'rugi' => ($p->margin ?? 0) < 0])>{{ \App\Support\UntungRugi::teksMargin($p->margin) }}</td>
+          @endif
+        </tr>
+      @empty
+        <tr><td colspan="{{ $bolehUntung ? 8 : 3 }}" class="empty">Tiada projek.</td></tr>
+      @endforelse
+      </tbody>
+      @if($ikutProjek->isNotEmpty())
+        <tfoot><tr><td><b>Jumlah · {{ $ikutProjek->count() }} projek</b></td>
+          <td class="num"><b>{{ $rm($ikutProjek->sum('belanja_tapis')) }}</b></td><td class="num"><b>{{ $ikutProjek->sum('rekod') }}</b></td>
+          @if($bolehUntung)<td colspan="5"></td>@endif</tr></tfoot>
+      @endif
+    </table></div>
+    <p class="nota-pnl">Klik projek untuk lihat setiap rekod perbelanjaannya.@if($bolehUntung) Untung dikira dari semua kategori perbelanjaan projek. <a href="{{ route('pnl') }}" wire:navigate style="color:var(--biru)">Laporan Untung Rugi penuh →</a>@endif</p>
+  @else
 
   @if($ikutKategori->isNotEmpty())
     <div class="card" style="margin-bottom:16px">
@@ -77,4 +115,5 @@
     </tbody>
   </table></div>
   <div style="margin-top:14px">{{ $senarai->links() }}</div>
+  @endif
 </div>
