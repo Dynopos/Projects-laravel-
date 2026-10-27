@@ -109,3 +109,13 @@ it('perbelanjaan: paparan ikut projek, tapis kategori, klik projek ke senarai', 
     Livewire::actingAs($staf)->test(SenaraiBelanja::class)->set('paparan', 'projek')
         ->assertSee('PRJ-01')->assertDontSee('PRJ-02')->assertDontSee('Untung dijangka');
 });
+
+it('tanpa projek, Perbelanjaan & Pembayaran tunjuk cara mula', function () {
+    $s = syarikatBaru();
+    semasa()->tetapkan($s);
+    $pemilik = ahli($s, Peranan::Pemilik);
+
+    $this->actingAs($pemilik)->get(urlSyarikat($s, '/perbelanjaan'))->assertOk()->assertSee('Belum ada projek')->assertSee('+ Cipta projek');
+    $this->actingAs($pemilik)->get(urlSyarikat($s, '/pembayaran'))->assertOk()->assertSee('Belum ada projek');
+    $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/perbelanjaan'))->assertDontSee('Belum ada projek');
+});

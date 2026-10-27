@@ -34,6 +34,8 @@
     </form>
   @endif
 
+  @if($projekSemua->isEmpty())<x-tiada-projek apa="bayaran" />@endif
+
   <div class="tiles tiga">
     <button type="button" @class(['tile', 'hero' => $status === 'Diterima' && $jenis === '']) wire:click="$set('status', 'Diterima'); $set('jenis', '')">
       <div class="h"><span>Diterima</span><div class="arw"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></div></div>

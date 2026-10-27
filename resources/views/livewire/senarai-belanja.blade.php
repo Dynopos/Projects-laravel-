@@ -27,6 +27,8 @@
     </form>
   @endif
 
+  @if($projekSemua->isEmpty())<x-tiada-projek apa="perbelanjaan" />@endif
+
   <x-baki-besar :masuk="$masuk" :keluar="$keluar" :nilai="$nilai" :label="$label" />
 
   <div class="tabs">
