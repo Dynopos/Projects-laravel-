@@ -95,3 +95,22 @@ it('kerja diasingkan antara syarikat', function () {
     semasa()->tetapkan(syarikatBaru());
     expect(Kerja::count())->toBe(0);
 });
+
+it('bayaran ada "Daripada": lalai klien projek, boleh ditukar kepada pemilik kerja', function () {
+    $this->p->update(['klien' => 'EN. ALI']);
+    $k = $this->p->tambahKerja(['nama' => 'Rumah Pn. Siti', 'nilai' => 250]);
+
+    Livewire::actingAs($this->pemilik)->test(ButiranProjek::class, ['projek' => $this->p->fresh()])
+        ->call('bukaRekod', 'bayaran')->assertSet('b.pembayar', 'EN. ALI')
+        ->set('b.pembayar', 'PN. SITI')->set('b.amaun', '250')->call('simpanBayaran')->assertHasNoErrors();
+    expect(Bayaran::latest('id')->first())->pembayar->toBe('PN. SITI')->kerja_id->toBe($k->id);
+
+    // Kosong → klien projek
+    $this->p->fresh()->rekodBayaran($this->pemilik, ['jenis' => 'Deposit', 'amaun' => 10, 'pembayar' => '  ']);
+    expect(Bayaran::latest('id')->first()->pembayar)->toBe('EN. ALI');
+
+    $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/projek/'.$this->p->id))->assertSee('Daripada PN. SITI');
+    $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/pembayaran'))->assertSee('Daripada PN. SITI');
+    $r = $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/eksport/bayaran.csv'));
+    expect($r->streamedContent())->toContain('PN. SITI');
+});

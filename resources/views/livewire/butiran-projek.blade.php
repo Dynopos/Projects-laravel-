@@ -30,6 +30,9 @@
         @if($kerja->isNotEmpty())
           <div class="full"><label>Kerja</label><select class="field" wire:model="b.kerja_id"><option value="">— Tidak ditetapkan —</option>@foreach($kerja as $kj)<option value="{{ $kj->id }}">{{ $kj->nama }}{{ $kj->siap ? ' (siap)' : '' }}</option>@endforeach</select></div>
         @endif
+        <div class="full"><label>Daripada</label><input class="field" wire:model="b.pembayar" list="pembayar-lalu" placeholder="Nama pembayar / pemilik">
+          <datalist id="pembayar-lalu">@foreach($pembayarLalu as $n)<option value="{{ $n }}">@endforeach</datalist>
+          @error('b.pembayar')<div class="ralat">{{ $message }}</div>@enderror</div>
         <div><label>Jenis</label><input class="field" wire:model="b.jenis" list="jenis-bayaran">
           <datalist id="jenis-bayaran"><option>Deposit</option><option>Bayaran Progres</option><option>Bayaran Akhir</option></datalist></div>
         <div><label>Amaun (RM)</label><input class="field" wire:model="b.amaun" inputmode="decimal">@error('b.amaun')<div class="ralat">{{ $message }}</div>@enderror</div>
@@ -169,7 +172,7 @@
     @forelse($bayaran as $b)
       <tr wire:key="b-{{ $b->id }}">
         <td>{{ $b->tarikh?->format('d/m/Y') ?? '—' }}</td>
-        <td>{{ $b->jenis }}@if($b->kerja)<br><small style="color:var(--muted)">{{ $b->kerja->nama }}</small>@endif</td>
+        <td>{{ $b->jenis }}@if($b->pembayar)<br><small style="color:var(--ink2)">Daripada {{ $b->pembayar }}</small>@endif @if($b->kerja)<br><small style="color:var(--muted)">{{ $b->kerja->nama }}</small>@endif</td>
         <td>{{ $b->kaedah ?: '—' }}@if($b->ruj)<br><small style="color:var(--muted)">{{ $b->ruj }}</small>@endif</td>
         <td><span class="tag t-{{ \Illuminate\Support\Str::slug($b->status) }}"><i></i>{{ $b->status }}</span></td>
         <td class="num">{{ $rm($sen($b->amaun)) }}</td>

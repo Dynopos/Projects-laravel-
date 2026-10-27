@@ -107,7 +107,7 @@ class ProjekForm extends Form
             $p = Projek::create($medan);
             if ((float) ($data['deposit'] ?? 0) > 0) {
                 $p->bayaran()->create([
-                    'jenis' => 'Deposit', 'amaun' => $data['deposit'], 'tarikh' => $p->mula ?? now(),
+                    'jenis' => 'Deposit', 'pembayar' => $p->klien, 'amaun' => $data['deposit'], 'tarikh' => $p->mula ?? now(),
                     'status' => Bayaran::DITERIMA,
                 ]);
             }

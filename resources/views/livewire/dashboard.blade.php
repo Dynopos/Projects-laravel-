@@ -30,7 +30,7 @@
       @foreach($menunggu as $b)
         <tr wire:key="m-{{ $b->id }}">
           <td><a href="{{ route('projek.butiran', $b->projek) }}" wire:navigate style="color:inherit"><b>{{ $b->projek->kod }}</b></a><br><small style="color:var(--muted)">{{ $b->projek->nama }}</small></td>
-          <td>{{ $b->jenis }}</td>
+          <td>{{ $b->jenis }}@if($b->pembayar)<br><small style="color:var(--muted)">Daripada {{ $b->pembayar }}</small>@endif</td>
           <td>{{ $b->tarikh?->format('d/m/Y') ?? '—' }}</td>
           <td class="num">{{ $rm(\App\Support\Kiraan::sen($b->amaun)) }}</td>
           <td>@if($bolehSahkan)<button class="btn sm biru" wire:click="sahkan({{ $b->id }})">Sahkan diterima</button>@else<span class="tag t-menunggu"><i></i>Menunggu</span>@endif</td>

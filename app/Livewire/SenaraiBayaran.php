@@ -55,7 +55,7 @@ class SenaraiBayaran extends Component
     {
         $this->b = [
             'projek_id' => $this->projek !== '' ? (int) $this->projek : '',
-            'jenis' => 'Bayaran Progres', 'amaun' => '', 'tarikh' => now()->toDateString(),
+            'pembayar' => '', 'jenis' => 'Bayaran Progres', 'amaun' => '', 'tarikh' => now()->toDateString(),
             'kaedah' => 'Pindahan Bank', 'ruj' => '', 'status' => Bayaran::DITERIMA,
         ];
         $this->borangBuka = true;
@@ -71,6 +71,7 @@ class SenaraiBayaran extends Component
             'b.kaedah' => ['nullable', 'string', 'max:60'],
             'b.ruj' => ['nullable', 'string', 'max:80'],
             'b.status' => ['required', 'in:Diterima,Menunggu'],
+            'b.pembayar' => ['nullable', 'string', 'max:120'],
         ], ['b.projek_id.required' => 'Pilih projek.'])['b'];
 
         $p = Projek::findOrFail($data['projek_id']);   // scope syarikat — syarikat lain = 404

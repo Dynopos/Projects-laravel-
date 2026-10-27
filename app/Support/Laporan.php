@@ -86,13 +86,13 @@ class Laporan
             'tapisan' => self::teksTapisan(['Projek' => self::namaProjek($projek), 'Status' => $status, 'Jenis' => $deposit ? 'Deposit sahaja' : '']),
             'lajur' => [
                 ['label' => 'Tarikh', 'jenis' => 'tarikh'], ['label' => 'Kod Projek', 'jenis' => 'teks'],
-                ['label' => 'Projek', 'jenis' => 'teks'], ['label' => 'Jenis', 'jenis' => 'teks'],
+                ['label' => 'Projek', 'jenis' => 'teks'], ['label' => 'Daripada', 'jenis' => 'teks'], ['label' => 'Jenis', 'jenis' => 'teks'],
                 ['label' => 'Kaedah', 'jenis' => 'teks'], ['label' => 'Rujukan', 'jenis' => 'teks'],
                 ['label' => 'Status', 'jenis' => 'teks'], ['label' => 'Amaun', 'jenis' => 'wang'],
             ],
-            'baris' => $rows->map(fn ($b) => [$b->tarikh?->toDateString(), $b->projek?->kod, $b->projek?->nama, $b->jenis,
+            'baris' => $rows->map(fn ($b) => [$b->tarikh?->toDateString(), $b->projek?->kod, $b->projek?->nama, $b->pembayar, $b->jenis,
                 $b->kaedah, $b->ruj, $b->status, Kiraan::sen($b->amaun)])->all(),
-            'jumlah' => $rows->isEmpty() ? null : ['JUMLAH · '.$rows->count().' bayaran', '', '', '', '', '', '',
+            'jumlah' => $rows->isEmpty() ? null : ['JUMLAH · '.$rows->count().' bayaran', '', '', '', '', '', '', '',
                 $rows->sum(fn ($b) => Kiraan::sen($b->amaun))],
         ];
     }

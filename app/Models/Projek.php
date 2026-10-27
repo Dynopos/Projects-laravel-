@@ -98,14 +98,14 @@ class Projek extends Model
      * Rekod bayaran oleh $oleh. Staf (bukan pengurusan) SENTIASA direkod sebagai Menunggu —
      * pengurus sahkan kemudian. Dikuatkuasa di sini supaya setiap borang ikut peraturan sama.
      *
-     * @param  array{jenis: string, amaun: mixed, tarikh?: ?string, kaedah?: ?string, ruj?: ?string, status?: string}  $data
+     * @param  array{jenis: string, pembayar?: ?string, amaun: mixed, tarikh?: ?string, kaedah?: ?string, ruj?: ?string, status?: string}  $data
      */
     public function rekodBayaran(User $oleh, array $data): Bayaran
     {
         $status = $oleh->peranan()?->pengurusan() ? ($data['status'] ?? Bayaran::DITERIMA) : Bayaran::MENUNGGU;
 
         return $this->bayaran()->create([
-            'jenis' => $data['jenis'], 'amaun' => $data['amaun'], 'tarikh' => ($data['tarikh'] ?? null) ?: null,
+            'jenis' => $data['jenis'], 'pembayar' => trim((string) ($data['pembayar'] ?? '')) ?: $this->klien, 'amaun' => $data['amaun'], 'tarikh' => ($data['tarikh'] ?? null) ?: null,
             'kaedah' => (string) ($data['kaedah'] ?? ''), 'ruj' => (string) ($data['ruj'] ?? ''), 'status' => $status,
             'kerja_id' => $this->idKerja($data['kerja_id'] ?? null),
         ]);

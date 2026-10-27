@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Table('bayaran')]
-#[Fillable(['projek_id', 'kerja_id', 'jenis', 'amaun', 'tarikh', 'kaedah', 'ruj', 'status'])]
+#[Fillable(['projek_id', 'kerja_id', 'jenis', 'pembayar', 'amaun', 'tarikh', 'kaedah', 'ruj', 'status'])]
 class Bayaran extends Model
 {
     use DirekodOleh, MilikSyarikat;

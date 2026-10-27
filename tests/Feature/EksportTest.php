@@ -32,10 +32,10 @@ it('CSV bayaran: BOM, tajuk, amaun nombor biasa, tapisan status, baris jumlah', 
     $isi = $r->streamedContent();
     expect($isi)->toStartWith("\xEF\xBB\xBF");
     $b = csvBaris($isi);
-    expect($b[0])->toBe(['Tarikh', 'Kod Projek', 'Projek', 'Jenis', 'Kaedah', 'Rujukan', 'Status', 'Amaun'])
-        ->and(collect($b)->slice(1)->pluck(5)->filter()->values()->all())->toBe(['RUJ-A1', 'RUJ-B1'])   // Menunggu ditapis keluar
-        ->and(collect($b)->firstWhere(5, 'RUJ-A1')[7])->toBe('3000.50')
-        ->and(end($b))->toBe(['JUMLAH · 2 bayaran', '', '', '', '', '', '', '8000.50']);
+    expect($b[0])->toBe(['Tarikh', 'Kod Projek', 'Projek', 'Daripada', 'Jenis', 'Kaedah', 'Rujukan', 'Status', 'Amaun'])
+        ->and(collect($b)->slice(1)->pluck(6)->filter()->values()->all())->toBe(['RUJ-A1', 'RUJ-B1'])   // Menunggu ditapis keluar
+        ->and(collect($b)->firstWhere(6, 'RUJ-A1')[8])->toBe('3000.50')
+        ->and(end($b))->toBe(['JUMLAH · 2 bayaran', '', '', '', '', '', '', '', '8000.50']);
 });
 
 it('CSV projek aktif mengecualikan projek siap; arkib sebaliknya', function () {

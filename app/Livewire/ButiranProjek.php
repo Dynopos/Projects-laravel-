@@ -76,7 +76,7 @@ class ButiranProjek extends Component
         }
         // Lalai: kerja terbaru yang belum siap, supaya rekod masuk ke kerja yang sedang berjalan.
         $kerja = $this->projek->kerja()->orderBy('siap')->latest('id')->value('id');
-        $this->b = ['kerja_id' => $kerja, 'jenis' => 'Bayaran Progres', 'amaun' => '', 'tarikh' => now()->toDateString(), 'kaedah' => 'Pindahan Bank', 'ruj' => '', 'status' => Bayaran::DITERIMA];
+        $this->b = ['kerja_id' => $kerja, 'pembayar' => $this->projek->klien, 'jenis' => 'Bayaran Progres', 'amaun' => '', 'tarikh' => now()->toDateString(), 'kaedah' => 'Pindahan Bank', 'ruj' => '', 'status' => Bayaran::DITERIMA];
         $this->bl = ['kerja_id' => $kerja, 'kategori' => KategoriBelanja::orderBy('susunan')->value('nama') ?? 'Lain-lain', 'amaun' => '', 'tarikh' => now()->toDateString(), 'penerima' => '', 'nota' => ''];
     }
 
@@ -91,6 +91,7 @@ class ButiranProjek extends Component
             'b.ruj' => ['nullable', 'string', 'max:80'],
             'b.status' => ['required', 'in:Diterima,Menunggu'],
             'b.kerja_id' => ['nullable', 'integer'],
+            'b.pembayar' => ['nullable', 'string', 'max:120'],
         ])['b'];
 
         // Staf dipaksa Menunggu di pelayan (Projek::rekodBayaran), bukan sekadar disorok dalam borang.
@@ -200,6 +201,7 @@ class ButiranProjek extends Component
         return view('livewire.butiran-projek', [
             'p' => $p,
             'bayaran' => $bayaran,
+            'pembayarLalu' => $bayaran->pluck('pembayar')->push($this->projek->klien)->filter()->unique()->values(),
             'belanja' => $belanja,
             'kerja' => $kerja,
             'tanpaKerja' => ['diterima' => $diterima[0] ?? 0, 'belanja' => $keluar[0] ?? 0],

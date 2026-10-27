@@ -17,6 +17,7 @@
             @foreach($projekRekod as $p)<option value="{{ $p->id }}">{{ $p->kod }} — {{ $p->nama }}</option>@endforeach
           </select>@error('b.projek_id')<div class="ralat">{{ $message }}</div>@enderror
         </div>
+        <div class="full"><label>Daripada</label><input class="field" wire:model="b.pembayar" placeholder="Nama pembayar — kosong = klien projek">@error('b.pembayar')<div class="ralat">{{ $message }}</div>@enderror</div>
         <div><label>Jenis</label><input class="field" wire:model="b.jenis" list="jenis-bayaran">
           <datalist id="jenis-bayaran"><option>Deposit</option><option>Bayaran Progres</option><option>Bayaran Akhir</option></datalist></div>
         <div><label>Amaun (RM)</label><input class="field" wire:model="b.amaun" inputmode="decimal">@error('b.amaun')<div class="ralat">{{ $message }}</div>@enderror</div>
@@ -70,7 +71,7 @@
       <tr wire:key="by-{{ $b->id }}">
         <td style="white-space:nowrap">{{ $b->tarikh?->format('d/m/Y') ?? '—' }}</td>
         <td><a href="{{ route('projek.butiran', $b->projek_id) }}" wire:navigate style="color:inherit"><b>{{ $b->projek?->kod }}</b></a><br><small style="color:var(--muted)">{{ $b->projek?->nama }}</small></td>
-        <td>{{ $b->jenis }}</td>
+        <td>{{ $b->jenis }}@if($b->pembayar)<br><small style="color:var(--muted)">Daripada {{ $b->pembayar }}</small>@endif</td>
         <td>{{ $b->kaedah ?: '—' }}@if($b->ruj)<br><small style="color:var(--muted)">{{ $b->ruj }}</small>@endif</td>
         <td><span class="tag t-{{ \Illuminate\Support\Str::slug($b->status) }}"><i></i>{{ $b->status }}</span></td>
         <td class="num">{{ $rm(\App\Support\Kiraan::sen($b->amaun)) }}</td>
