@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Table('syarikat')]
-#[Fillable(['nama', 'sufiks', 'jabatan', 'logo_path', 'subdomain', 'domain', 'kod_awalan', 'status', 'zon_waktu'])]
+#[Fillable(['nama', 'sufiks', 'jabatan', 'logo_path', 'subdomain', 'domain', 'kod_awalan', 'status', 'aktif_hingga', 'peringatan', 'zon_waktu'])]
 class Syarikat extends Model
 {
     use HasFactory;
@@ -22,6 +22,11 @@ class Syarikat extends Model
         'sufiks' => '', 'jabatan' => 'Jabatan Projek', 'kod_awalan' => 'PRJ-',
         'status' => 'percubaan', 'zon_waktu' => 'Asia/Kuala_Lumpur',
     ];
+
+    protected function casts(): array
+    {
+        return ['aktif_hingga' => 'date'];
+    }
 
     public function keahlian(): HasMany
     {
@@ -76,6 +81,12 @@ class Syarikat extends Model
         $hos = $this->domain ?: $this->subdomain.'.'.config('dyno.domain_utama');
 
         return $skema.'://'.$hos.'/'.ltrim($laluan, '/');
+    }
+
+    /** Hari sehingga langganan tamat (negatif = sudah tamat); null = tiada tarikh tamat. */
+    public function bakiHari(): ?int
+    {
+        return $this->aktif_hingga ? (int) now()->startOfDay()->diffInDays($this->aktif_hingga, false) : null;
     }
 
     public function bacaSahaja(): bool

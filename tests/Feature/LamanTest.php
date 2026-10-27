@@ -22,7 +22,7 @@ it('landing page di domain utama: satu h1 dengan kata kunci, meta, canonical, JS
     $ld = json_decode($m[1], true);
     expect($ld['@context'])->toBe('https://schema.org')
         ->and(array_column($ld['@graph'], '@type'))->toBe(['Organization', 'SoftwareApplication', 'FAQPage'])
-        ->and($ld['@graph'][2]['mainEntity'])->toHaveCount(6);
+        ->and($ld['@graph'][2]['mainEntity'])->toHaveCount(7);
 });
 
 it('setiap imej landing ada lebar, tinggi dan alt', function () {

@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Syarikat mesti ditetapkan SEBELUM route model binding — jika tidak, {projek}
         // dicari tanpa syarikat, scope gagal tertutup dan setiap halaman butiran jadi 404.
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: TentukanSyarikat::class);
+        // CHIP memanggil dari pelayannya — tiada token CSRF; disahkan dengan X-Signature.
+        $middleware->validateCsrfTokens(except: ['chip/callback']);
         $middleware->redirectGuestsTo(fn () => route('masuk'));
         $middleware->redirectUsersTo(fn () => route('dashboard'));
     })

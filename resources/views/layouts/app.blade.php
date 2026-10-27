@@ -1,5 +1,6 @@
 @php($syarikat = app(\App\Support\SyarikatSemasa::class)->wajib())
 @php($u = auth()->user())
+@php($bakiHari = $syarikat->bakiHari())
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -38,6 +39,7 @@
       <a href="{{ route('log') }}" wire:navigate @class(['on' => request()->routeIs('log')])><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg> Log Aktiviti</a>
       @if($u->peranan()?->bolehTetapan())
         <a href="{{ route('tetapan') }}" wire:navigate @class(['on' => request()->routeIs('tetapan')])><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg> Tetapan</a>
+        <a href="{{ route('langganan') }}" wire:navigate @class(['on' => request()->routeIs('langganan')])><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg> Langganan</a>
       @endif
       @if($u->peranan()?->bolehUrus())
         <a href="{{ route('ahli') }}" wire:navigate @class(['on' => request()->routeIs('ahli')])><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><path d="M19 8v6M16 11h6"/></svg> Ahli &amp; Jemputan</a>
@@ -60,6 +62,18 @@
       </div>
     </div>
     <div class="body">
+      @if($syarikat->bacaSahaja() || ($bakiHari !== null && $bakiHari <= 30 && $u->peranan()?->bolehTetapan()))
+        <div class="jalur-langganan" role="status">
+          @if($syarikat->bacaSahaja())
+            <span>Langganan tamat — sistem dalam mod <b>baca sahaja</b>. Data boleh dilihat dan dieksport.</span>
+          @elseif($bakiHari < 0)
+            <span>Langganan tamat pada {{ $syarikat->aktif_hingga->format('d/m/Y') }}. Perbaharui dalam {{ config('dyno.tempoh_tangguh') + $bakiHari }} hari untuk elak mod baca sahaja.</span>
+          @else
+            <span>Langganan tamat dalam <b>{{ $bakiHari }} hari</b> ({{ $syarikat->aktif_hingga->format('d/m/Y') }}).</span>
+          @endif
+          @if($u->peranan()?->bolehTetapan())<a class="btn sm p" href="{{ route('langganan') }}" wire:navigate>Perbaharui</a>@else<span>Hubungi pemilik syarikat.</span>@endif
+        </div>
+      @endif
       {{ $slot }}
     </div>
   </div>

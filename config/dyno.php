@@ -15,6 +15,25 @@ return [
         'emel' => env('DYNO_EMEL'),
     ],
 
+    // Harga langganan dalam sen (CHIP). Daftar = persediaan + tahun pertama; pembaharuan = setiap tahun.
+    'harga' => [
+        'daftar' => (int) env('DYNO_HARGA_DAFTAR', 9900),
+        'pembaharuan' => (int) env('DYNO_HARGA_PEMBAHARUAN', 3000),
+    ],
+
+    // Hari selepas aktif_hingga sebelum syarikat jadi baca sahaja.
+    'tempoh_tangguh' => 14,
+
+    // Pengendali perkhidmatan — dipapar dalam Terma & Notis Privasi.
+    'pengendali' => [
+        'nama' => env('DYNO_PENGENDALI_NAMA', 'Dyno Project OS'),
+        'ssm' => env('DYNO_PENGENDALI_SSM'),
+        'alamat' => env('DYNO_PENGENDALI_ALAMAT'),
+        'emel' => env('DYNO_EMEL_PRIVASI', env('DYNO_EMEL')),
+        'hosting' => env('DYNO_HOSTING', 'penyedia awan kami'),
+        'lokasi_server' => env('DYNO_LOKASI_SERVER', 'Singapura'),
+    ],
+
     // Cakera untuk fail syarikat (logo; kelak resit). Produksi: s3 (R2/Spaces), peribadi.
     'cakera' => env('DYNO_CAKERA', 'local'),
 

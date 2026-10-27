@@ -13,6 +13,16 @@ class LamanController extends Controller
         return view('laman.utama', ['demo' => self::pautanDemo()]);
     }
 
+    public function privasi()
+    {
+        return view('laman.privasi');
+    }
+
+    public function terma()
+    {
+        return view('laman.terma');
+    }
+
     /** Domain utama boleh diindeks; setiap ruang syarikat (subdomain/domain sendiri) disekat. */
     public function robots(bool $utama)
     {
@@ -25,7 +35,13 @@ class LamanController extends Controller
 
     public function sitemap()
     {
-        $urls = [['loc' => self::url('/'), 'priority' => '1.0', 'lastmod' => date('Y-m-d', filemtime(resource_path('views/laman/utama.blade.php')))]];
+        $tarikh = fn ($v) => date('Y-m-d', filemtime(resource_path("views/laman/{$v}.blade.php")));
+        $urls = [
+            ['loc' => self::url('/'), 'priority' => '1.0', 'lastmod' => $tarikh('utama')],
+            ['loc' => self::url('/daftar'), 'priority' => '0.8', 'lastmod' => $tarikh('daftar')],
+            ['loc' => self::url('/terma'), 'priority' => '0.3', 'lastmod' => $tarikh('terma')],
+            ['loc' => self::url('/privasi'), 'priority' => '0.3', 'lastmod' => $tarikh('privasi')],
+        ];
 
         return response()->view('laman.sitemap', compact('urls'))->header('Content-Type', 'application/xml');
     }

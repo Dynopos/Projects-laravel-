@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\Peranan;
+use App\Http\Controllers\DaftarController;
 use App\Mail\JemputanMail;
 use App\Models\Jemputan;
 use App\Models\Syarikat;
+use App\Support\Langganan;
 use App\Support\SyarikatSemasa;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -15,7 +16,8 @@ use Throwable;
 
 /**
  * Cipta syarikat pelanggan baharu + jemputan untuk pemiliknya.
- * Satu-satunya cara syarikat wujud di produksi (seeder demo hanya untuk tempatan).
+ * Untuk pelanggan yang diurus manual — tiada tarikh tamat langganan. Pelanggan yang
+ * daftar sendiri di /daftar melalui Langganan::ciptaPendaftaran().
  *
  *   php artisan dyno:syarikat-baru "FINE CABINETRY" finecabinetry pemilik@contoh.my --sufiks=".CO" --awalan=FC-
  */
@@ -28,11 +30,12 @@ class SyarikatBaru extends Command
         {--sufiks= : cth " SDN BHD" (warna emas)}
         {--awalan=PRJ- : Awalan kod projek}
         {--domain= : Domain sendiri pelanggan (pilihan), cth management.syarikat.my}
-        {--tanpa-emel : Jangan hantar e-mel; papar pautan sahaja}';
+        {--tanpa-emel : Jangan hantar e-mel; papar pautan sahaja}
+        {--setahun : Langganan aktif 12 bulan dari hari ini (pelanggan bayar RM99 secara manual) — dapat peringatan & pembaharuan RM30}';
 
     protected $description = 'Cipta syarikat pelanggan baharu dan jemput pemiliknya';
 
-    public function handle(SyarikatSemasa $semasa): int
+    public function handle(SyarikatSemasa $semasa, Langganan $langganan): int
     {
         $data = [
             'nama' => trim($this->argument('nama')),
@@ -44,7 +47,7 @@ class SyarikatBaru extends Command
 
         $v = Validator::make($data, [
             'nama' => ['required', 'max:80'],
-            'subdomain' => ['required', 'regex:/^[a-z0-9]([a-z0-9-]{0,40}[a-z0-9])?$/', 'not_in:www,admin,api,mail,app'],
+            'subdomain' => ['required', 'regex:/^[a-z0-9]([a-z0-9-]{0,40}[a-z0-9])?$/', 'not_in:'.implode(',', DaftarController::TERPELIHARA)],
             'emel' => ['required', 'email'],
             'awalan' => ['required', 'max:12', 'regex:/^[A-Z0-9]+-?$/'],
             'domain' => ['nullable', 'regex:/^[a-z0-9.-]+\.[a-z]{2,}$/'],
@@ -57,7 +60,7 @@ class SyarikatBaru extends Command
             return self::FAILURE;
         }
 
-        return $semasa->tanpaSkop(function () use ($data, $semasa) {
+        return $semasa->tanpaSkop(function () use ($data, $langganan) {
             if (Syarikat::where('subdomain', $data['subdomain'])->exists()) {
                 $this->error("Subdomain \"{$data['subdomain']}\" sudah digunakan.");
 
@@ -69,16 +72,14 @@ class SyarikatBaru extends Command
                 return self::FAILURE;
             }
 
-            $s = Syarikat::create([
-                'nama' => $data['nama'], 'sufiks' => (string) $this->option('sufiks'), 'subdomain' => $data['subdomain'],
-                'domain' => $data['domain'], 'kod_awalan' => $data['awalan'], 'status' => 'aktif',
-            ]);
-            $s->sediakanTetapanLalai();
-
-            [$j, $token] = $semasa->sebagai($s, fn () => Jemputan::terbitkan($data['emel'], Peranan::Pemilik, null));
+            [$s, $j, $token] = $langganan->bukaAkaun([...$data, 'sufiks' => (string) $this->option('sufiks')],
+                $this->option('setahun') ? now()->addYear() : null);
             $pautan = $s->url('/jemputan/'.$token);
 
             $this->info("Syarikat \"{$s->namaPenuh()}\" dicipta: ".$s->url('/'));
+            if ($s->aktif_hingga) {
+                $this->info('Langganan aktif hingga '.$s->aktif_hingga->format('d/m/Y').'.');
+            }
 
             if (! $this->option('tanpa-emel')) {
                 try {

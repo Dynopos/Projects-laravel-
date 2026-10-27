@@ -93,9 +93,23 @@ mesti beri Baki Terkini **RM227,400**, duit masuk RM1,269,100, belanja RM1,041,7
 Jangan bergantung pada menyembunyikan butang — setiap tindakan Livewire panggil
 `$this->authorize()`. Syarikat berstatus `baca_sahaja`/`digantung` tak boleh menulis.
 
+## Langganan (CHIP)
+
+`App\Support\Langganan` + `App\Support\Chip`. Harga dalam `config('dyno.harga')` (sen).
+
+- `/daftar` (domain utama) → `ciptaPendaftaran()` → CHIP. Syarikat **hanya** dicipta dalam
+  `selesaikan()` selepas CHIP sahkan `paid`, rujukan dan amaun sepadan.
+- `selesaikan()` sentiasa `GET /purchases/{id}` — badan callback tidak dipercayai — dan
+  idempoten (`lockForUpdate`, status `dibayar`). Callback disahkan dengan `X-Signature` (RSA).
+- Pautan selesai `/daftar/selesai/{id}/{tanda}`: `tanda` = HMAC id dengan APP_KEY. Butang
+  "Tetapkan kata laluan" menerbitkan jemputan pemilik baharu sehingga pemilik wujud.
+- `aktif_hingga` null = diurus manual (tiada peringatan). `--setahun` pada arahan = 12 bulan.
+- `UrusLangganan` sengaja tidak disekat `bacaSahaja()` — syarikat tamat mesti boleh bayar.
+- `dyno:semak-langganan` (harian): peringatan 30/7/1/0 hari, `baca_sahaja` selepas tempoh tangguh.
+
 ## Jemputan
 
-Satu-satunya cara akaun baharu wujud. `UrusAhli` (Livewire) hantar `JemputanMail`;
+Cara akaun pengguna wujud (pemilik dari daftar sendiri pun masuk melalui jemputan). `UrusAhli` (Livewire) hantar `JemputanMail`;
 `JemputanController` terima di `/jemputan/{token}`.
 
 - Token asal hanya dalam e-mel; jadual simpan **hash SHA-256**. Sah 7 hari, sekali guna,
@@ -229,7 +243,8 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] Tab Pembayaran — semua bayaran, kotak Diterima/Deposit/Menunggu (sama dengan Dashboard), sahkan & padam
 - [x] Tab Perbelanjaan — semua projek, tapis projek/kategori, ringkasan kategori, rekod & padam
 - [x] Import Excel — PROJECT FLOW (`HuraiFlow`) + generik (`HuraiGenerik`), pratonton & amaran
-- [ ] Panel pentadbir (Filament), langganan + payment gateway
+- [x] Daftar sendiri + langganan CHIP (RM99 daftar, RM30/tahun), peringatan, baca sahaja, Terma & Privasi
+- [ ] Panel pentadbir (Filament)
 - [ ] PWA, masa nyata (Reverb)
 - [ ] Migrasi Fine Cabinetry
 - [ ] Invois PDF, notifikasi WhatsApp, pembantu bil AI

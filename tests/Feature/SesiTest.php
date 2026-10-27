@@ -77,6 +77,13 @@ it('arahan dyno:syarikat-baru mencipta syarikat dan jemputan pemilik yang berfun
     expect(PeringkatAliran::count())->toBeGreaterThan(0);
 });
 
+it('arahan dyno:syarikat-baru --setahun menetapkan tarikh tamat langganan', function () {
+    $this->artisan('dyno:syarikat-baru', ['nama' => 'FAIZ', 'subdomain' => 'faiz', 'emel' => 'f@f.test', '--tanpa-emel' => true, '--setahun' => true])
+        ->expectsOutputToContain('aktif hingga')->assertSuccessful();
+    $s = semasa()->tanpaSkop(fn () => Syarikat::where('subdomain', 'faiz')->sole());
+    expect($s->aktif_hingga->toDateString())->toBe(now()->addYear()->toDateString());
+});
+
 it('arahan dyno:syarikat-baru menolak subdomain pendua atau tidak sah', function () {
     $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => $this->s->subdomain, 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();
     $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => 'Bukan Sah!', 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();

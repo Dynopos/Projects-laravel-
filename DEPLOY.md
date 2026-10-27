@@ -40,6 +40,17 @@ DYNO_WHATSAPP=60123456789      # butang "Minta demo" di landing page (atau DYNO_
 
 MAIL_MAILER=smtp               # Postmark / SES / Mailgun — perlu untuk e-mel jemputan
 MAIL_FROM_ADDRESS="noreply@dynoproject.my"
+
+# Daftar sendiri + bayaran (lihat langkah 8). Kosong = /daftar papar "akan dibuka".
+CHIP_SECRET_KEY=...            # portal.chip-in.asia → Developers → API keys
+CHIP_BRAND_ID=...              # portal.chip-in.asia → Developers → Brands
+
+# Dipapar dalam /terma dan /privasi
+DYNO_PENGENDALI_NAMA="Nama Perniagaan Sdn Bhd"
+DYNO_PENGENDALI_SSM=202601234567
+DYNO_EMEL_PRIVASI=privasi@dynoproject.my
+DYNO_HOSTING="DigitalOcean"
+DYNO_LOKASI_SERVER=Singapura
 ```
 
 `APP_KEY` dijana oleh Forge. **Jangan** commit `.env`.
@@ -81,11 +92,28 @@ Data demo (`db:seed`) **tidak** dijalankan di produksi. Cipta syarikat sebenar m
 **Site → Commands** (atau SSH):
 
 ```bash
-php artisan dyno:syarikat-baru "FINE CABINETRY" finecabinetry pemilik@contoh.my --sufiks=".CO" --awalan=FC-
+php artisan dyno:syarikat-baru "FINE CABINETRY" finecabinetry pemilik@contoh.my --sufiks=".CO" --awalan=FC- --setahun
 ```
+
+`--setahun` = pelanggan yang bayar RM99 secara manual: langganan aktif 12 bulan, dapat
+peringatan dan boleh bayar pembaharuan RM30 dalam app. Tanpanya = tiada tarikh tamat.
 
 Pemilik menerima e-mel jemputan; arahan itu juga memaparkan pautan jemputan (sah 7 hari)
 jika e-mel belum disediakan. Selepas pemilik masuk, dia jemput staf dari **Ahli & Jemputan**.
+
+## 8. Daftar sendiri & langganan (CHIP)
+
+1. Isi `CHIP_SECRET_KEY` dan `CHIP_BRAND_ID`. Mula dengan **kunci test** — bayar dengan kad
+   ujian `4444 3333 2222 1111`, CVC `123` — kemudian tukar ke kunci live.
+2. **Site → Scheduler → hidupkan** (`php artisan schedule:run` setiap minit). Ia menjalankan
+   `dyno:semak-langganan` setiap hari jam 9 pagi: e-mel peringatan 30/7/1/0 hari sebelum
+   tamat, dan mod baca sahaja 14 hari selepas tamat.
+3. Tiada webhook perlu didaftarkan: setiap purchase membawa `success_callback`
+   (`https://dynoproject.my/chip/callback`), dan halaman selesai juga menyemak CHIP terus.
+
+Aliran: `/daftar` → CHIP (RM99) → syarikat dicipta, aktif 1 tahun → e-mel + butang
+"Tetapkan kata laluan" → pemilik masuk. Pembaharuan RM30: menu **Langganan** dalam app.
+Senarai bayaran: jadual `pembayaran_langganan`.
 
 ## Selepas landing page hidup (SEO)
 

@@ -1,6 +1,8 @@
 @php
   $u = fn ($p) => \App\Http\Controllers\LamanController::url($p);
   $domain = config('dyno.domain_utama');
+  $harga = number_format(config('dyno.harga.daftar') / 100, 0);
+  $baharu = number_format(config('dyno.harga.pembaharuan') / 100, 0);
   // Soalan lazim — dipapar DAN dihantar sebagai FAQPage JSON-LD, jadi teksnya mesti sama.
   $soalan = [
     ['Siapa yang sesuai guna Dyno Project OS?', 'Kontraktor dan pemaju pembinaan yang perlu urus projek, kutipan, deposit dan perbelanjaan bersama pasukan dalam satu sistem — bukan lagi Excel yang dikongsi.'],
@@ -8,6 +10,7 @@
     ['Boleh bawa masuk data Excel sedia ada?', 'Ya. Import Excel memadankan lajur secara automatik, kemudian menunjukkan pratonton dan semakan jumlah sebelum apa-apa disimpan.'],
     ['Boleh staf sahkan bayaran sendiri?', 'Tidak. Bayaran yang staf rekod masuk sebagai Menunggu. Pemilik atau pengurus mesti menyemak dan mengesahkannya sebelum baki terkini berubah.'],
     ['Adakah data syarikat saya selamat?', 'Data setiap syarikat dikunci dalam kod aplikasi dan dalam pangkalan data, dan diuji secara automatik supaya tidak boleh dibaca oleh syarikat lain. Setiap tindakan direkod dalam log aktiviti yang tidak boleh dipadam.'],
+    ['Berapa harga Dyno Project OS?', "RM{$harga} untuk persediaan dan langganan tahun pertama, kemudian RM{$baharu} setahun. Daftar dan bayar online dengan FPX atau kad, dan ruang syarikat anda dicipta sebaik bayaran disahkan."],
     ['Adakah invois dan notifikasi WhatsApp tersedia?', 'Belum. Invois PDF, notifikasi WhatsApp, pembantu bil AI dan lampiran gambar resit ialah ciri dalam perancangan. Eksport laporan CSV dan PDF sudah tersedia.'],
   ];
   // Kunci "@..." dibina dengan "\x40" — Blade menganggap '@context' dalam templat sebagai arahan @context.
@@ -17,7 +20,8 @@
     [$at.'type' => 'Organization', $at.'id' => $org, 'name' => 'Dyno Project OS', 'url' => $u('/'), 'logo' => $u('/img/ikon-512.png')],
     [$at.'type' => 'SoftwareApplication', 'name' => 'Dyno Project OS', 'applicationCategory' => 'BusinessApplication', 'operatingSystem' => 'Web, iOS, Android',
       'inLanguage' => 'ms', 'url' => $u('/'), 'image' => $u('/img/laman/dashboard.webp'), 'publisher' => [$at.'id' => $org],
-      'description' => 'Sistem pengurusan projek, kutipan dan perbelanjaan untuk kontraktor dan pemaju pembinaan di Malaysia.'],
+      'description' => 'Sistem pengurusan projek, kutipan dan perbelanjaan untuk kontraktor dan pemaju pembinaan di Malaysia.',
+      'offers' => [$at.'type' => 'Offer', 'price' => (string) (config('dyno.harga.daftar') / 100), 'priceCurrency' => 'MYR', 'url' => $u('/daftar')]],
     [$at.'type' => 'FAQPage', 'mainEntity' => array_map(fn ($q) => [$at.'type' => 'Question', 'name' => $q[0],
       'acceptedAnswer' => [$at.'type' => 'Answer', 'text' => $q[1]]], $soalan)],
   ]], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
@@ -53,11 +57,11 @@
     <span>DYNO<em>PROJECT OS</em></span>
   </a>
   <nav class="pautan" aria-label="Navigasi utama">
-    <a href="#ciri">Ciri sistem</a><a href="#pratonton">Pratonton</a><a href="#pasukan">Untuk pasukan</a><a href="#mula">Cara mula</a><a href="#soalan">Soalan</a>
+    <a href="#ciri">Ciri sistem</a><a href="#pratonton">Pratonton</a><a href="#pasukan">Untuk pasukan</a><a href="#mula">Cara mula</a><a href="#harga">Harga</a><a href="#soalan">Soalan</a>
   </nav>
   <div class="nav-butang">
     <button class="btn hantu" type="button" data-buka="dialog-masuk">Log masuk</button>
-    <a class="btn emas" href="{{ $demo }}" @if(str_starts_with($demo, 'http')) target="_blank" rel="noopener" @endif>Minta demo</a>
+    <a class="btn emas" href="/daftar">Daftar</a>
   </div>
 </header>
 
@@ -69,8 +73,8 @@
       <h1><span class="h1-kata-kunci">Sistem pengurusan projek kontraktor</span> Setiap projek. Setiap ringgit. <em>Dalam kawalan.</em></h1>
       <p class="lead">Dyno Project OS menghimpunkan projek, kutipan dan perbelanjaan dalam satu sistem — tahu baki sebenar setiap projek tanpa selongkar Excel satu per satu.</p>
       <div class="tindakan">
-        <a class="btn emas besar" href="{{ $demo }}" @if(str_starts_with($demo, 'http')) target="_blank" rel="noopener" @endif>Minta demo percuma <span aria-hidden="true">↗</span></a>
-        <a class="btn hantu besar" href="#pratonton">Lihat sistem <span aria-hidden="true">↓</span></a>
+        <a class="btn emas besar" href="/daftar">Daftar — RM{{ $harga }} tahun pertama</a>
+        <a class="btn hantu besar" href="{{ $demo }}" @if(str_starts_with($demo, 'http')) target="_blank" rel="noopener" @endif>Minta demo percuma <span aria-hidden="true">↗</span></a>
       </div>
       <p class="mikro"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Di pejabat atau di tapak. Web, iPhone &amp; Android.</p>
     </div>
@@ -195,11 +199,34 @@
       <p>Kami urus hos, sandaran dan kemas kini. Anda fokus pada projek dan pasukan.</p>
     </div>
     <ol class="langkah">
-      <li><span>01</span><h3>Ruang syarikat</h3><p>Alamat syarikat anda disediakan dan jemputan dihantar kepada pemilik.</p></li>
+      <li><span>01</span><h3>Daftar &amp; bayar</h3><p>Pilih alamat syarikat dan bayar RM{{ $harga }}. Ruang anda dicipta serta-merta.</p></li>
       <li><span>02</span><h3>Ikut identiti anda</h3><p>Tetapkan logo, kod projek, kategori dan peringkat kerja syarikat.</p></li>
       <li><span>03</span><h3>Jemput pasukan</h3><p>Masukkan e-mel dan pilih peranan. Staf tetapkan kata laluan sendiri.</p></li>
       <li><span>04</span><h3>Bawa data lama</h3><p>Import Excel sedia ada. Semak pratonton sebelum data disimpan.</p></li>
     </ol>
+  </section>
+
+  {{-- ============ HARGA ============ --}}
+  <section id="harga" class="bahagian bungkus">
+    <div class="harga-blok">
+      <div>
+        <p class="kening">05 / Harga</p>
+        <h2>Satu harga.<br>Semua ciri.</h2>
+        <p>Tiada pakej bertingkat dan tiada caj tersembunyi. Bayar dengan FPX, kad atau e-dompet melalui CHIP — ruang syarikat anda sedia sebaik bayaran disahkan.</p>
+      </div>
+      <div class="kad harga-kad">
+        <p class="kening">Tahun pertama</p>
+        <p class="harga">RM{{ $harga }}<small>persediaan + langganan 12 bulan</small></p>
+        <p class="harga-kecil">Kemudian RM{{ $baharu }} setahun</p>
+        <ul>
+          <li>Projek, kutipan, perbelanjaan dan baki terkini</li>
+          <li>Empat peranan: pemilik, pengurus, staf, akauntan</li>
+          <li>Import Excel dan eksport CSV / PDF</li>
+          <li>Hosting, sandaran harian dan kemas kini</li>
+        </ul>
+        <a class="btn emas besar" href="/daftar">Daftar sekarang →</a>
+      </div>
+    </div>
   </section>
 
   {{-- ============ SOALAN ============ --}}
@@ -216,7 +243,7 @@
     <div class="cta-akhir">
       <img src="/img/laman/dyno-logo.webp" width="160" height="160" alt="" loading="lazy" decoding="async">
       <div><h2>Projek bergerak.<br>Angka mesti ikut sekali.</h2><p>Lihat bagaimana kutipan, perbelanjaan dan baki bertemu dalam satu ruang — dengan data syarikat anda sendiri.</p></div>
-      <a class="btn emas besar" href="{{ $demo }}" @if(str_starts_with($demo, 'http')) target="_blank" rel="noopener" @endif>Minta demo percuma <span aria-hidden="true">↗</span></a>
+      <a class="btn emas besar" href="/daftar">Daftar — RM{{ $harga }} <span aria-hidden="true">→</span></a>
     </div>
   </section>
 </main>
@@ -224,6 +251,7 @@
 <footer class="kaki bungkus">
   <a class="jenama" href="/"><img src="/img/laman/dyno-logo.webp" alt="" width="32" height="32" loading="lazy"><span>DYNO<em>PROJECT OS</em></span></a>
   <span>© {{ date('Y') }} Dyno Project OS · Sistem pengurusan projek untuk kontraktor &amp; pemaju di Malaysia</span>
+  <span class="pautan-kaki"><a href="/terma">Terma</a><a href="/privasi">Notis Privasi</a></span>
   <a href="#utama">Kembali ke atas ↑</a>
 </footer>
 
@@ -237,7 +265,7 @@
     <div class="medan-sub"><input id="sub" name="sub" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="namasyarikat" required><span>.{{ $domain }}</span></div>
     <p class="ralat" id="ralat-sub" hidden>Masukkan alamat seperti yang ada dalam e-mel jemputan anda.</p>
     <button class="btn emas besar" type="submit">Teruskan ke log masuk ↗</button>
-    <p class="nota-kecil">Belum ada akaun? Staf masuk melalui jemputan daripada pengurus syarikat anda.</p>
+    <p class="nota-kecil">Belum ada akaun? Staf masuk melalui jemputan daripada pengurus syarikat anda. Syarikat baharu boleh <a href="/daftar" style="text-decoration:underline">daftar di sini</a>.</p>
   </form>
 </dialog>
 
