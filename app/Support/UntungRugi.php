@@ -4,15 +4,17 @@ namespace App\Support;
 
 use App\Models\Bayaran;
 use App\Models\Belanja;
+use App\Models\BelanjaUmum;
 use App\Models\Projek;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
- * Untung rugi (PNL) ikut projek — tiada kos overhead syarikat.
+ * Untung rugi (PNL).
  *
- *   Untung tunai   = Σ bayaran diterima − Σ perbelanjaan   (ikut tarikh; = Baki Terkini)
- *   Untung dijangka = nilai kontrak − perbelanjaan setakat ini (per projek)
+ *   Untung setakat ini (untung_tunai)  = Σ bayaran diterima − Σ perbelanjaan projek  (= Baki Terkini)
+ *   Untung bersih                      = untung projek − Σ perbelanjaan umum (overhead) (bulanan, semua projek sahaja)
+ *   Untung bila siap (untung_jangka)   = nilai kontrak − perbelanjaan setakat ini (per projek)
  *   Margin          = untung ÷ asasnya (kutipan / nilai kontrak)
  *
  * Bayaran Menunggu tidak dikira, sama seperti Kiraan. Semua amaun dalam SEN.
@@ -20,30 +22,34 @@ use Illuminate\Support\Collection;
 class UntungRugi
 {
     /**
-     * 12 bulan setahun: masuk, keluar, untung, kumulatif. Rekod tanpa tarikh dikira berasingan.
+     * 12 bulan setahun: masuk, keluar (projek), untung, umum (overhead), bersih, kumulatif (bersih).
+     * Overhead hanya dikira bila $umum — ia milik syarikat, bukan projek yang ditapis.
+     * Rekod tanpa tarikh dikira berasingan.
      *
      * @param  Builder<Projek>  $projek
-     * @return array{bulan: list<array{bulan: int, masuk: int, keluar: int, untung: int, kumulatif: int}>, masuk: int, keluar: int, untung: int, tanpa_tarikh: int}
+     * @return array{bulan: list<array{bulan: int, masuk: int, keluar: int, untung: int, umum: int, bersih: int, kumulatif: int}>, masuk: int, keluar: int, untung: int, umum: int, bersih: int, tanpa_tarikh: int}
      */
-    public static function bulanan(Builder $projek, int $tahun): array
+    public static function bulanan(Builder $projek, int $tahun, bool $umum = false): array
     {
         $ids = $projek->clone()->select('id');
         $masuk = self::ikutBulan(Bayaran::query()->whereIn('projek_id', $ids)->where('status', '!=', Bayaran::MENUNGGU), $tahun);
         $keluar = self::ikutBulan(Belanja::query()->whereIn('projek_id', $ids), $tahun);
+        $overhead = $umum ? self::ikutBulan(BelanjaUmum::query(), $tahun) : ['bulan' => [], 'tanpa_tarikh' => 0];
 
         $kumulatif = 0;
         $bulan = [];
         for ($b = 1; $b <= 12; $b++) {
             $untung = ($masuk['bulan'][$b] ?? 0) - ($keluar['bulan'][$b] ?? 0);
-            $kumulatif += $untung;
+            $bersih = $untung - ($overhead['bulan'][$b] ?? 0);
+            $kumulatif += $bersih;
             $bulan[] = ['bulan' => $b, 'masuk' => $masuk['bulan'][$b] ?? 0, 'keluar' => $keluar['bulan'][$b] ?? 0,
-                'untung' => $untung, 'kumulatif' => $kumulatif];
+                'untung' => $untung, 'umum' => $overhead['bulan'][$b] ?? 0, 'bersih' => $bersih, 'kumulatif' => $kumulatif];
         }
-        $jumlahMasuk = array_sum(array_column($bulan, 'masuk'));
-        $jumlahKeluar = array_sum(array_column($bulan, 'keluar'));
+        $j = fn ($k) => array_sum(array_column($bulan, $k));
 
-        return ['bulan' => $bulan, 'masuk' => $jumlahMasuk, 'keluar' => $jumlahKeluar, 'untung' => $jumlahMasuk - $jumlahKeluar,
-            'tanpa_tarikh' => $masuk['tanpa_tarikh'] + $keluar['tanpa_tarikh']];
+        return ['bulan' => $bulan, 'masuk' => $j('masuk'), 'keluar' => $j('keluar'), 'untung' => $j('untung'),
+            'umum' => $j('umum'), 'bersih' => $j('bersih'),
+            'tanpa_tarikh' => $masuk['tanpa_tarikh'] + $keluar['tanpa_tarikh'] + $overhead['tanpa_tarikh']];
     }
 
     /**
@@ -81,7 +87,7 @@ class UntungRugi
     public static function senaraiTahun(Builder $projek): array
     {
         $ids = $projek->clone()->select('id');
-        $tahun = collect([Bayaran::query()->whereIn('projek_id', $ids), Belanja::query()->whereIn('projek_id', $ids)])
+        $tahun = collect([Bayaran::query()->whereIn('projek_id', $ids), Belanja::query()->whereIn('projek_id', $ids), BelanjaUmum::query()])
             ->flatMap(fn ($q) => $q->whereNotNull('tarikh')->pluck('tarikh'))
             ->map(fn ($t) => (int) $t->format('Y'))->push((int) now()->format('Y'));
 

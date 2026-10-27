@@ -37,7 +37,8 @@ class LaporanUntungRugi extends Component
         return view('livewire.untung-rugi', [
             'senaraiTahun' => $senaraiTahun,
             'tahunDipilih' => $tahun,
-            'b' => UntungRugi::bulanan($this->projek(), $tahun),
+            'b' => UntungRugi::bulanan($this->projek(), $tahun, $this->kat === ''),
+            'umumDikira' => $this->kat === '',
             'projek' => UntungRugi::perProjek($this->projek(), $this->susun),
         ]);
     }

@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Livewire\LaporanUntungRugi;
 use App\Models\Bayaran;
 use App\Models\Belanja;
+use App\Models\BelanjaUmum;
 use App\Models\Projek;
 use App\Models\User;
 
@@ -17,7 +18,7 @@ use App\Models\User;
  */
 class Laporan
 {
-    public const JENIS = ['projek', 'arkib', 'bayaran', 'belanja', 'pnl', 'pnl-bulan'];
+    public const JENIS = ['projek', 'arkib', 'bayaran', 'belanja', 'belanja-umum', 'pnl', 'pnl-bulan'];
 
     /** @param array<string, string> $t tapisan dari query string */
     public static function bina(string $jenis, User $user, array $t): array
@@ -27,6 +28,7 @@ class Laporan
             'arkib' => self::projek($user, $t, true),
             'bayaran' => self::bayaran($user, $t),
             'belanja' => self::belanja($user, $t),
+            'belanja-umum' => self::belanjaUmum($t),
             'pnl' => self::pnl($user, $t),
             'pnl-bulan' => self::pnlBulan($user, $t),
         };
@@ -121,6 +123,25 @@ class Laporan
         ];
     }
 
+    private static function belanjaUmum(array $t): array
+    {
+        $kategori = $t['kategori'] ?? '';
+        $rows = BelanjaUmum::query()->when($kategori !== '', fn ($q) => $q->where('kategori', $kategori))
+            ->with('perekod:id,name')->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get();
+
+        return [
+            'tajuk' => 'Perbelanjaan Umum',
+            'tapisan' => self::teksTapisan(['Kategori' => $kategori]),
+            'lajur' => [
+                ['label' => 'Tarikh', 'jenis' => 'tarikh'], ['label' => 'Kategori', 'jenis' => 'teks'], ['label' => 'Penerima', 'jenis' => 'teks'],
+                ['label' => 'Nota', 'jenis' => 'teks'], ['label' => 'Direkod oleh', 'jenis' => 'teks'], ['label' => 'Amaun', 'jenis' => 'wang'],
+            ],
+            'baris' => $rows->map(fn ($x) => [$x->tarikh?->toDateString(), $x->kategori, $x->penerima, $x->nota, $x->perekod?->name,
+                Kiraan::sen($x->amaun)])->all(),
+            'jumlah' => $rows->isEmpty() ? null : ['JUMLAH · '.$rows->count().' rekod', '', '', '', '', $rows->sum(fn ($x) => Kiraan::sen($x->amaun))],
+        ];
+    }
+
     private const KAT_PNL = ['aktif' => 'Projek aktif', 'siap' => 'Projek siap'];
 
     private static function pnl(User $user, array $t): array
@@ -137,8 +158,8 @@ class Laporan
             'lajur' => [
                 ['label' => 'Kod', 'jenis' => 'teks'], ['label' => 'Projek', 'jenis' => 'teks'], ['label' => 'Status', 'jenis' => 'teks'],
                 ['label' => 'Nilai Kontrak', 'jenis' => 'wang'], ['label' => 'Diterima', 'jenis' => 'wang'],
-                ['label' => 'Perbelanjaan', 'jenis' => 'wang'], ['label' => 'Untung Tunai', 'jenis' => 'wang'],
-                ['label' => 'Untung Dijangka', 'jenis' => 'wang'], ['label' => 'Margin', 'jenis' => 'teks'],
+                ['label' => 'Perbelanjaan', 'jenis' => 'wang'], ['label' => 'Untung Setakat Ini', 'jenis' => 'wang'],
+                ['label' => 'Untung Bila Siap', 'jenis' => 'wang'], ['label' => '% Untung', 'jenis' => 'teks'],
             ],
             'baris' => $rows->map(fn ($p) => [$p->kod, $p->nama, $p->status, $p->nilai_sen, $p->diterima_sen, $p->belanja_sen,
                 $p->untung_tunai, $p->untung_jangka, UntungRugi::teksMargin($p->margin)])->all(),
@@ -153,7 +174,8 @@ class Laporan
         $q = LaporanUntungRugi::tapis(Projek::query()->bolehDilihat($user), $kat);
         $senarai = UntungRugi::senaraiTahun($q);
         $tahun = in_array((int) ($t['tahun'] ?? 0), $senarai, true) ? (int) $t['tahun'] : $senarai[0];
-        $b = UntungRugi::bulanan($q, $tahun);
+        $umum = $kat === '';
+        $b = UntungRugi::bulanan($q, $tahun, $umum);
         $bulan = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
 
         return [
@@ -161,11 +183,14 @@ class Laporan
             'tapisan' => self::teksTapisan(['Tahun' => (string) $tahun, 'Projek' => self::KAT_PNL[$kat] ?? ''])
                 .($b['tanpa_tarikh'] ? " · {$b['tanpa_tarikh']} rekod tanpa tarikh tidak dikira" : ''),
             'lajur' => [
-                ['label' => 'Bulan', 'jenis' => 'teks'], ['label' => 'Kutipan', 'jenis' => 'wang'], ['label' => 'Perbelanjaan', 'jenis' => 'wang'],
-                ['label' => 'Untung', 'jenis' => 'wang'], ['label' => 'Kumulatif', 'jenis' => 'wang'],
+                ['label' => 'Bulan', 'jenis' => 'teks'], ['label' => 'Kutipan', 'jenis' => 'wang'], ['label' => 'Belanja Projek', 'jenis' => 'wang'],
+                ['label' => 'Untung Projek', 'jenis' => 'wang'],
+                ...($umum ? [['label' => 'Belanja Umum', 'jenis' => 'wang'], ['label' => 'Untung Bersih', 'jenis' => 'wang']] : []),
+                ['label' => 'Kumulatif', 'jenis' => 'wang'],
             ],
-            'baris' => array_map(fn ($m) => [$bulan[$m['bulan'] - 1], $m['masuk'], $m['keluar'], $m['untung'], $m['kumulatif']], $b['bulan']),
-            'jumlah' => ["JUMLAH {$tahun}", $b['masuk'], $b['keluar'], $b['untung'], ''],
+            'baris' => array_map(fn ($m) => [$bulan[$m['bulan'] - 1], $m['masuk'], $m['keluar'], $m['untung'],
+                ...($umum ? [$m['umum'], $m['bersih']] : []), $m['kumulatif']], $b['bulan']),
+            'jumlah' => ["JUMLAH {$tahun}", $b['masuk'], $b['keluar'], $b['untung'], ...($umum ? [$b['umum'], $b['bersih']] : []), ''],
         ];
     }
 

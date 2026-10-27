@@ -79,9 +79,9 @@
     @php($jumlahBelanja = $belanjaKategori->sum('sen'))
     <div class="seclab"><b>Untung rugi projek</b><span></span><a href="{{ route('pnl') }}" wire:navigate style="font-size:12px;color:var(--biru)">Semua projek →</a></div>
     <div class="tiles tiga">
-      <x-tile k="Untung tunai" :v="\App\Support\Kiraan::rm($untungTunai)" f="Diterima − perbelanjaan" />
-      <x-tile k="Untung dijangka" :v="\App\Support\Kiraan::rm($untungJangka)" f="Nilai kontrak − perbelanjaan" hero />
-      <x-tile k="Margin dijangka" :v="\App\Support\UntungRugi::teksMargin($margin)" :f="$untungJangka < 0 ? 'Projek ini rugi' : 'Untung ÷ nilai kontrak'" />
+      <x-tile k="Untung setakat ini" :v="\App\Support\Kiraan::rm($untungTunai)" :f="$untungTunai < 0 ? 'Belanja lebih dari duit diterima' : 'Duit diterima − perbelanjaan'" />
+      <x-tile k="Untung bila siap" :v="\App\Support\Kiraan::rm($untungJangka)" f="Jika klien bayar penuh: kontrak − perbelanjaan" hero />
+      <x-tile k="% untung bila siap" :v="\App\Support\UntungRugi::teksMargin($margin)" :f="$untungJangka < 0 ? 'Projek ini rugi' : 'Untung bila siap ÷ nilai kontrak'" />
     </div>
     @if($belanjaKategori->isNotEmpty())
       <div class="card" style="margin-bottom:16px">

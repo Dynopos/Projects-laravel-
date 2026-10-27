@@ -50,5 +50,8 @@ return [
         'baki' => 'Bayaran akhir',
     ],
 
+    // Kategori perbelanjaan umum (overhead) — senarai cadangan; pengguna boleh taip kategori lain.
+    'kategori_umum' => ['Sewa', 'Gaji pejabat', 'Utiliti', 'Kenderaan & minyak', 'Pemasaran', 'Peralatan pejabat', 'Yuran & lesen', 'Lain-lain'],
+
     'kategori_lalai' => ['Material', 'Upah pekerja', 'Subkontraktor', 'Pengangkutan', 'Peralatan', 'Lain-lain'],
 ];

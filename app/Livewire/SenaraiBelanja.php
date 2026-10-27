@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Belanja;
+use App\Models\BelanjaUmum;
 use App\Models\KategoriBelanja;
 use App\Models\Projek;
 use App\Support\Kiraan;
+use App\Support\SyarikatSemasa;
 use App\Support\UntungRugi;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -29,18 +31,25 @@ class SenaraiBelanja extends Component
     #[Url]
     public string $kategori = '';
 
-    /** senarai | projek — "Ikut projek" meringkaskan perbelanjaan & untung setiap projek. */
+    /** senarai | projek | umum — "Ikut projek" meringkaskan setiap projek; "Umum" = overhead syarikat. */
     #[Url]
     public string $paparan = 'senarai';
 
     public bool $borangBuka = false;
 
+    public bool $umumBuka = false;
+
+    /** Borang perbelanjaan umum (overhead). */
+    public array $bu = [];
+
     public array $bl = [];
 
     public function updated($medan): void
     {
-        if ($medan === 'paparan' && $this->paparan === 'projek') {
-            $this->projek = '';     // jadual ikut projek sentiasa merangkumi semua projek
+        if ($medan === 'paparan') {
+            $this->projek = '';     // ikut projek / umum sentiasa merangkumi semua
+            $this->kategori = '';   // kategori umum ≠ kategori projek
+            $this->borangBuka = $this->umumBuka = false;
         }
         if (in_array($medan, ['projek', 'kategori', 'paparan'], true)) {
             $this->resetPage();
@@ -87,6 +96,46 @@ class SenaraiBelanja extends Component
         $this->resetPage();
     }
 
+    // ---------- Perbelanjaan umum (overhead) ----------
+
+    public function bukaUmum(): void
+    {
+        abort_unless($this->bolehTulisUmum(), 403);
+        $this->bu = ['kategori' => $this->kategori ?: config('dyno.kategori_umum')[0], 'amaun' => '',
+            'tarikh' => now()->toDateString(), 'penerima' => '', 'nota' => ''];
+        $this->umumBuka = true;
+    }
+
+    public function simpanUmum(): void
+    {
+        abort_unless($this->bolehTulisUmum(), 403);
+        $data = $this->validate([
+            'bu.kategori' => ['required', 'string', 'max:60'],
+            'bu.amaun' => ['required', 'numeric', 'gt:0', 'max:999999999999'],
+            'bu.tarikh' => ['nullable', 'date'],
+            'bu.penerima' => ['nullable', 'string', 'max:255'],
+            'bu.nota' => ['nullable', 'string', 'max:2000'],
+        ], [], ['bu.kategori' => 'kategori', 'bu.amaun' => 'amaun'])['bu'];
+
+        BelanjaUmum::create([
+            'kategori' => trim($data['kategori']), 'amaun' => $data['amaun'], 'tarikh' => $data['tarikh'] ?: null,
+            'penerima' => (string) $data['penerima'], 'nota' => $data['nota'] ?: null,
+        ]);
+        $this->umumBuka = false;
+    }
+
+    public function padamUmum(int $id): void
+    {
+        abort_unless($this->bolehTulisUmum(), 403);
+        BelanjaUmum::findOrFail($id)->delete();
+    }
+
+    /** Overhead: pemilik & pengurus rekod/padam; akauntan lihat; staf tiada akses. */
+    private function bolehTulisUmum(): bool
+    {
+        return (bool) auth()->user()->peranan()?->pengurusan() && ! app(SyarikatSemasa::class)->wajib()->bacaSahaja();
+    }
+
     public function padam(int $id): void
     {
         $x = Belanja::whereIn('projek_id', $this->projekDilihat()->select('id'))->findOrFail($id);
@@ -97,6 +146,9 @@ class SenaraiBelanja extends Component
     public function render()
     {
         $user = auth()->user();
+        if ($this->paparan === 'umum' && ! $user->peranan()?->bolehEksport()) {
+            $this->paparan = 'senarai';
+        }
         $semuaProjek = $this->projekDilihat()->orderBy('kod')->get(['id', 'kod', 'nama', 'syarikat_id']);
 
         $q = Belanja::query()->whereIn('projek_id', $semuaProjek->modelKeys())
@@ -138,8 +190,27 @@ class SenaraiBelanja extends Component
             'nilai' => $jumlah->sum('nilai_sen'),
             'label' => $pilihan ? "{$pilihan->kod} — {$pilihan->nama}" : 'semua projek',
             'ikutProjek' => $ikutProjek,
+            ...($this->paparan === 'umum' ? $this->dataUmum() : []),
+            'bolehTulisUmum' => $this->bolehTulisUmum(),
             'bolehUntung' => (bool) $user->peranan()?->bolehEksport(),
         ]);
+    }
+
+    private function dataUmum(): array
+    {
+        $q = BelanjaUmum::query()->when($this->kategori !== '', fn ($q) => $q->where('kategori', $this->kategori));
+        $ikutKategori = BelanjaUmum::query()->selectRaw('kategori, sum(amaun) as jumlah, count(*) as n')->groupBy('kategori')->get()
+            ->map(fn ($r) => ['nama' => $r->kategori, 'sen' => Kiraan::sen($r->jumlah), 'n' => (int) $r->n])->sortByDesc('sen')->values();
+        $tahunIni = BelanjaUmum::query()->whereNotNull('tarikh')->get(['tarikh', 'amaun'])
+            ->filter(fn ($x) => $x->tarikh->year === now()->year)->sum(fn ($x) => Kiraan::sen($x->amaun));
+
+        return [
+            'umum' => (clone $q)->with('perekod:id,name')->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->paginate(30),
+            'umumKategori' => $ikutKategori,
+            'umumJumlah' => $ikutKategori->sum('sen'),
+            'umumTahunIni' => $tahunIni,
+            'kategoriUmum' => collect(config('dyno.kategori_umum'))->merge($ikutKategori->pluck('nama'))->unique()->values(),
+        ];
     }
 
     private function projekDilihat()

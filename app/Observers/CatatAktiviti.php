@@ -4,12 +4,13 @@ namespace App\Observers;
 
 use App\Models\Bayaran;
 use App\Models\Belanja;
+use App\Models\BelanjaUmum;
 use App\Models\LogAktiviti;
 use App\Models\Projek;
 use App\Support\Kiraan;
 use Illuminate\Database\Eloquent\Model;
 
-/** Setiap perubahan pada projek, bayaran dan belanja masuk log aktiviti secara automatik. */
+/** Setiap perubahan pada projek, bayaran, belanja dan belanja umum masuk log aktiviti secara automatik. */
 class CatatAktiviti
 {
     private static int $senyap = 0;
@@ -58,6 +59,7 @@ class CatatAktiviti
             $m instanceof Projek => 'projek',
             $m instanceof Bayaran => 'bayaran',
             $m instanceof Belanja => 'perbelanjaan',
+            $m instanceof BelanjaUmum => 'perbelanjaan umum',
             default => class_basename($m),
         };
     }
@@ -68,6 +70,7 @@ class CatatAktiviti
             $m instanceof Projek => "{$m->kod} — {$m->nama}",
             $m instanceof Bayaran => ($m->projek?->kod ?? '?')." · {$m->jenis} · ".Kiraan::rm(Kiraan::sen($m->amaun))." · {$m->status}",
             $m instanceof Belanja => ($m->projek?->kod ?? '?')." · {$m->kategori} · ".Kiraan::rm(Kiraan::sen($m->amaun)),
+            $m instanceof BelanjaUmum => "Umum · {$m->kategori} · ".Kiraan::rm(Kiraan::sen($m->amaun)),
             default => (string) $m->getKey(),
         };
     }

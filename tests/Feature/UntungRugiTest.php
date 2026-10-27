@@ -3,6 +3,8 @@
 use App\Enums\Peranan;
 use App\Livewire\LaporanUntungRugi;
 use App\Livewire\SenaraiBelanja;
+use App\Models\BelanjaUmum;
+use App\Models\LogAktiviti;
 use App\Models\Projek;
 use App\Support\UntungRugi;
 use Livewire\Livewire;
@@ -55,10 +57,10 @@ it('per projek: untung tunai, untung dijangka dan margin', function () {
 
 it('halaman untung rugi: tapis tahun & projek siap', function () {
     Livewire::actingAs($this->pemilik)->test(LaporanUntungRugi::class)
-        ->assertSee('Untung tunai · 2026')->assertSee('−RM7,000.00')->assertSee('1 rekod bayaran/perbelanjaan tanpa tarikh')
+        ->assertSee('Untung bersih · 2026')->assertSee('−RM7,000.00')->assertSee('1 rekod bayaran/perbelanjaan tanpa tarikh')
         ->assertSee('Rumah A')->assertSee('Rumah B')
-        ->set('tahun', '2025')->assertSee('Untung tunai · 2025')->assertSee('RM5,000.00')
-        ->set('kat', 'aktif')->assertSee('Rumah A')->assertDontSee('Rumah B');
+        ->set('tahun', '2025')->assertSee('Untung bersih · 2025')->assertSee('RM5,000.00')
+        ->set('kat', 'aktif')->assertSee('Untung projek · 2026')->assertSee('hanya ditolak bila')->assertSee('Rumah A')->assertDontSee('Rumah B');
 
     $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/untung-rugi'))->assertOk()->assertSee('Untung Rugi');
 });
@@ -72,14 +74,15 @@ it('staf tidak boleh buka untung rugi; akauntan dan pengurus boleh', function ()
 it('eksport CSV untung rugi projek dan bulanan', function () {
     $r = $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/eksport/pnl.csv?susun=untung'))->assertOk();
     $b = csvBaris($r->streamedContent());
-    expect($b[0])->toBe(['Kod', 'Projek', 'Status', 'Nilai Kontrak', 'Diterima', 'Perbelanjaan', 'Untung Tunai', 'Untung Dijangka', 'Margin'])
+    expect($b[0])->toBe(['Kod', 'Projek', 'Status', 'Nilai Kontrak', 'Diterima', 'Perbelanjaan', 'Untung Setakat Ini', 'Untung Bila Siap', '% Untung'])
         ->and($b[1])->toBe(['PRJ-02', 'Rumah B', 'Siap', '5000.00', '5000.00', '6500.00', '-1500.00', '-1500.00', '−30.0%'])
         ->and(end($b))->toBe(['JUMLAH · 2 projek', '', '', '15000.00', '11000.00', '13500.00', '-2500.00', '1500.00', '10.0%']);
 
     $r = $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/eksport/pnl-bulan.csv?tahun=2026'))->assertOk();
     $b = csvBaris($r->streamedContent());
-    expect($b[3])->toBe(['Mac', '3000.00', '2000.00', '1000.00', '-5000.00'])
-        ->and(end($b))->toBe(['JUMLAH 2026', '6000.00', '13000.00', '-7000.00', '']);
+    expect($b[0])->toBe(['Bulan', 'Kutipan', 'Belanja Projek', 'Untung Projek', 'Belanja Umum', 'Untung Bersih', 'Kumulatif'])
+        ->and($b[3])->toBe(['Mac', '3000.00', '2000.00', '1000.00', '0.00', '1000.00', '-5000.00'])
+        ->and(end($b))->toBe(['JUMLAH 2026', '6000.00', '13000.00', '-7000.00', '0.00', '-7000.00', '']);
 
     $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/eksport/pnl.pdf'))->assertOk()->assertHeader('Content-Type', 'application/pdf');
     $this->actingAs(ahli($this->s, Peranan::Staf))->get(urlSyarikat($this->s, '/eksport/pnl.csv'))->assertForbidden();
@@ -100,14 +103,14 @@ it('perbelanjaan: paparan ikut projek, tapis kategori, klik projek ke senarai', 
     Livewire::actingAs($this->pemilik)->test(SenaraiBelanja::class)
         ->set('projek', (string) $this->a->id)
         ->set('paparan', 'projek')->assertSet('projek', '')
-        ->assertSeeInOrder(['PRJ-01', 'RM7,000.00', 'PRJ-02', 'RM6,500.00'])->assertSee('Untung dijangka')
+        ->assertSeeInOrder(['PRJ-01', 'RM7,000.00', 'PRJ-02', 'RM6,500.00'])->assertSee('Untung bila siap')
         ->set('kategori', 'Material')->assertSee('RM6,000.00')->assertSee('RM2,000.00')
         ->call('pilihProjek', $this->b->id)->assertSet('paparan', 'senarai')->assertSet('projek', (string) $this->b->id);
 
     $staf = ahli($this->s, Peranan::Staf);
     $this->a->staf()->attach($staf->id, ['syarikat_id' => $this->s->id]);
     Livewire::actingAs($staf)->test(SenaraiBelanja::class)->set('paparan', 'projek')
-        ->assertSee('PRJ-01')->assertDontSee('PRJ-02')->assertDontSee('Untung dijangka');
+        ->assertSee('PRJ-01')->assertDontSee('PRJ-02')->assertDontSee('Untung bila siap');
 });
 
 it('tanpa projek, Perbelanjaan & Pembayaran tunjuk cara mula', function () {
@@ -118,4 +121,42 @@ it('tanpa projek, Perbelanjaan & Pembayaran tunjuk cara mula', function () {
     $this->actingAs($pemilik)->get(urlSyarikat($s, '/perbelanjaan'))->assertOk()->assertSee('Belum ada projek')->assertSee('+ Cipta projek');
     $this->actingAs($pemilik)->get(urlSyarikat($s, '/pembayaran'))->assertOk()->assertSee('Belum ada projek');
     $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/perbelanjaan'))->assertDontSee('Belum ada projek');
+});
+
+it('perbelanjaan umum: pengurusan rekod, akauntan lihat, staf tiada; ditolak sebagai untung bersih', function () {
+    $lw = Livewire::actingAs($this->pemilik)->test(SenaraiBelanja::class)->set('paparan', 'umum')
+        ->assertSee('Belum ada perbelanjaan umum')
+        ->call('bukaUmum')->set('bu.kategori', 'Sewa')->set('bu.amaun', '1500')->set('bu.tarikh', '2026-03-05')->set('bu.penerima', 'TUAN RUMAH')
+        ->call('simpanUmum')->assertHasNoErrors()
+        ->call('bukaUmum')->set('bu.kategori', 'Utiliti')->set('bu.amaun', '500')->set('bu.tarikh', '2026-06-20')->call('simpanUmum')
+        ->assertSee('TUAN RUMAH')->assertSee('RM2,000.00');
+
+    expect(BelanjaUmum::count())->toBe(2)
+        ->and(LogAktiviti::where('tindakan', 'Tambah perbelanjaan umum')->count())->toBe(2);
+
+    // Untung bersih = untung projek − umum, hanya bila semua projek
+    $b = UntungRugi::bulanan(Projek::query(), 2026, true);
+    expect($b['umum'])->toBe(200000)->and($b['bersih'])->toBe(-900000)
+        ->and($b['bulan'][2])->toMatchArray(['untung' => 100000, 'umum' => 150000, 'bersih' => -50000])
+        ->and(UntungRugi::bulanan(Projek::query(), 2026)['umum'])->toBe(0);
+    Livewire::actingAs($this->pemilik)->test(LaporanUntungRugi::class)->assertSee('Untung bersih · 2026')->assertSee('−RM9,000.00');
+
+    $akauntan = ahli($this->s, Peranan::Akauntan);
+    Livewire::actingAs($akauntan)->test(SenaraiBelanja::class)->set('paparan', 'umum')
+        ->assertSee('TUAN RUMAH')->assertDontSee('+ Perbelanjaan umum')->call('bukaUmum')->assertForbidden();
+
+    $staf = ahli($this->s, Peranan::Staf);
+    Livewire::actingAs($staf)->test(SenaraiBelanja::class)->set('paparan', 'umum')
+        ->assertSet('paparan', 'senarai')->assertDontSee('TUAN RUMAH');
+
+    $r = $this->actingAs($this->pemilik)->get(urlSyarikat($this->s, '/eksport/belanja-umum.csv'))->assertOk();
+    $baris = csvBaris($r->streamedContent());
+    expect(end($baris))->toBe(['JUMLAH · 2 rekod', '', '', '', '', '2000.00']);
+});
+
+it('perbelanjaan umum diasingkan antara syarikat', function () {
+    BelanjaUmum::create(['kategori' => 'Sewa', 'amaun' => 100, 'tarikh' => '2026-01-01']);
+    $lain = syarikatBaru();
+    semasa()->tetapkan($lain);
+    expect(BelanjaUmum::count())->toBe(0);
 });
