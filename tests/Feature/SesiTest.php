@@ -6,6 +6,7 @@ use App\Models\LogAktiviti;
 use App\Models\PeringkatAliran;
 use App\Models\Syarikat;
 use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -88,4 +89,20 @@ it('arahan dyno:syarikat-baru menolak subdomain pendua atau tidak sah', function
     $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => $this->s->subdomain, 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();
     $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => 'Bukan Sah!', 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();
     $this->artisan('dyno:syarikat-baru', ['nama' => 'X', 'subdomain' => 'www', 'emel' => 'a@b.test', '--tanpa-emel' => true])->assertFailed();
+});
+
+it('arahan dyno:jemput-pemilik terbit semula pautan, kemudian beritahu bila pemilik sudah ada', function () {
+    $this->artisan('dyno:syarikat-baru', ['nama' => 'FAIZ', 'subdomain' => 'faiz', 'emel' => 'f@f.test', '--tanpa-emel' => true])->assertSuccessful();
+
+    $this->artisan('dyno:jemput-pemilik', ['subdomain' => 'faiz', '--setahun' => true])
+        ->expectsOutputToContain('aktif hingga')->expectsOutputToContain('f@f.test')->assertSuccessful();
+    $s = semasa()->tanpaSkop(fn () => Syarikat::where('subdomain', 'faiz')->sole());
+    expect($s->aktif_hingga)->not->toBeNull();
+
+    Artisan::call('dyno:jemput-pemilik', ['subdomain' => 'faiz']);
+    preg_match('#http\S+/jemputan/\S+#', Artisan::output(), $m);
+    $this->post($m[0], ['name' => 'Faiz', 'password' => 'rahsia-faiz', 'password_confirmation' => 'rahsia-faiz'])->assertRedirect();
+
+    $this->artisan('dyno:jemput-pemilik', ['subdomain' => 'faiz'])->expectsOutputToContain('Pemilik sudah mendaftar')->assertSuccessful();
+    $this->artisan('dyno:jemput-pemilik', ['subdomain' => 'tiada'])->assertFailed();
 });

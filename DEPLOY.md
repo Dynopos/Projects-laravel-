@@ -95,6 +95,12 @@ Data demo (`db:seed`) **tidak** dijalankan di produksi. Cipta syarikat sebenar m
 php artisan dyno:syarikat-baru "FINE CABINETRY" finecabinetry pemilik@contoh.my --sufiks=".CO" --awalan=FC- --setahun
 ```
 
+Pautan jemputan hilang / tamat, atau arahan di atas kata "sudah digunakan":
+
+```bash
+php artisan dyno:jemput-pemilik finecabinetry            # pautan baharu (+ --setahun jika perlu)
+```
+
 `--setahun` = pelanggan yang bayar RM99 secara manual: langganan aktif 12 bulan, dapat
 peringatan dan boleh bayar pembaharuan RM30 dalam app. Tanpanya = tiada tarikh tamat.
 
