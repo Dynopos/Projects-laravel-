@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Table('belanja')]
-#[Fillable(['projek_id', 'kategori', 'amaun', 'tarikh', 'penerima', 'nota', 'resit_path'])]
+#[Fillable(['projek_id', 'kerja_id', 'kategori', 'amaun', 'tarikh', 'penerima', 'nota', 'resit_path'])]
 class Belanja extends Model
 {
     use DirekodOleh, MilikSyarikat;
@@ -23,6 +23,11 @@ class Belanja extends Model
     public function projek(): BelongsTo
     {
         return $this->belongsTo(Projek::class);
+    }
+
+    public function kerja(): BelongsTo
+    {
+        return $this->belongsTo(Kerja::class);
     }
 
     public function perekod(): BelongsTo

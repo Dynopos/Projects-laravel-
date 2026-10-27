@@ -11,7 +11,8 @@
     <div><label>Klien</label><input class="field" wire:model="form.klien"></div>
     <div><label>Telefon</label><input class="field" wire:model="form.telefon" inputmode="tel"></div>
     <div class="full"><label>Lokasi</label><input class="field" wire:model="form.lokasi"></div>
-    <div><label>Nilai kontrak (RM)</label><input class="field" wire:model="form.nilai" inputmode="decimal">@error('form.nilai')<div class="ralat">{{ $message }}</div>@enderror</div>
+    <div><label>Nilai kontrak (RM)</label><input class="field" wire:model="form.nilai" inputmode="decimal" @disabled($form->adaKerja)>
+      @error('form.nilai')<div class="ralat">{{ $message }}</div>@else @if($form->adaKerja)<div class="hint" style="margin-top:6px;text-align:left">Jumlah semua kerja — ubah nilai dalam senarai Kerja.</div>@endif @enderror</div>
     <div><label>Tarikh mula</label><input class="field" type="date" wire:model="form.mula"></div>
     <div><label>No. invois</label><input class="field" wire:model="form.inv"></div>
     @unless($form->projek)

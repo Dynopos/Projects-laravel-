@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Bayaran;
 use App\Models\Belanja;
 use App\Models\BelanjaUmum;
+use App\Models\Kerja;
 use App\Models\LogAktiviti;
 use App\Models\Projek;
 use App\Support\Kiraan;
@@ -60,6 +61,7 @@ class CatatAktiviti
             $m instanceof Bayaran => 'bayaran',
             $m instanceof Belanja => 'perbelanjaan',
             $m instanceof BelanjaUmum => 'perbelanjaan umum',
+            $m instanceof Kerja => 'kerja',
             default => class_basename($m),
         };
     }
@@ -71,6 +73,7 @@ class CatatAktiviti
             $m instanceof Bayaran => ($m->projek?->kod ?? '?')." · {$m->jenis} · ".Kiraan::rm(Kiraan::sen($m->amaun))." · {$m->status}",
             $m instanceof Belanja => ($m->projek?->kod ?? '?')." · {$m->kategori} · ".Kiraan::rm(Kiraan::sen($m->amaun)),
             $m instanceof BelanjaUmum => "Umum · {$m->kategori} · ".Kiraan::rm(Kiraan::sen($m->amaun)),
+            $m instanceof Kerja => ($m->projek?->kod ?? '?')." · {$m->nama} · ".Kiraan::rm(Kiraan::sen($m->nilai)),
             default => (string) $m->getKey(),
         };
     }

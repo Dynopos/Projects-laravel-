@@ -23,8 +23,13 @@ class ButiranProjek extends Component
 
     public ProjekForm $form;
 
-    /** 'bayaran' | 'belanja' | null */
+    /** 'bayaran' | 'belanja' | 'kerja' | null */
     public ?string $rekod = null;
+
+    /** Borang kerja: tambah (kerjaId null) atau ubah. */
+    public array $k = [];
+
+    public ?int $kerjaId = null;
 
     public array $b = [];
 
@@ -61,8 +66,18 @@ class ButiranProjek extends Component
     {
         $this->authorize('rekod', $this->projek);
         $this->rekod = $jenis;
-        $this->b = ['jenis' => 'Bayaran Progres', 'amaun' => '', 'tarikh' => now()->toDateString(), 'kaedah' => 'Pindahan Bank', 'ruj' => '', 'status' => Bayaran::DITERIMA];
-        $this->bl = ['kategori' => KategoriBelanja::orderBy('susunan')->value('nama') ?? 'Lain-lain', 'amaun' => '', 'tarikh' => now()->toDateString(), 'penerima' => '', 'nota' => ''];
+        if ($jenis === 'kerja') {
+            $this->authorize('update', $this->projek);
+            $this->kerjaId = null;
+            $this->k = ['nama' => '', 'nilai' => '', 'tarikh' => now()->toDateString(), 'nota' => ''];
+            $this->rekod = 'kerja';
+
+            return;
+        }
+        // Lalai: kerja terbaru yang belum siap, supaya rekod masuk ke kerja yang sedang berjalan.
+        $kerja = $this->projek->kerja()->orderBy('siap')->latest('id')->value('id');
+        $this->b = ['kerja_id' => $kerja, 'jenis' => 'Bayaran Progres', 'amaun' => '', 'tarikh' => now()->toDateString(), 'kaedah' => 'Pindahan Bank', 'ruj' => '', 'status' => Bayaran::DITERIMA];
+        $this->bl = ['kerja_id' => $kerja, 'kategori' => KategoriBelanja::orderBy('susunan')->value('nama') ?? 'Lain-lain', 'amaun' => '', 'tarikh' => now()->toDateString(), 'penerima' => '', 'nota' => ''];
     }
 
     public function simpanBayaran(): void
@@ -75,6 +90,7 @@ class ButiranProjek extends Component
             'b.kaedah' => ['nullable', 'string', 'max:60'],
             'b.ruj' => ['nullable', 'string', 'max:80'],
             'b.status' => ['required', 'in:Diterima,Menunggu'],
+            'b.kerja_id' => ['nullable', 'integer'],
         ])['b'];
 
         // Staf dipaksa Menunggu di pelayan (Projek::rekodBayaran), bukan sekadar disorok dalam borang.
@@ -91,10 +107,57 @@ class ButiranProjek extends Component
             'bl.tarikh' => ['nullable', 'date'],
             'bl.penerima' => ['nullable', 'string', 'max:255'],
             'bl.nota' => ['nullable', 'string', 'max:2000'],
+            'bl.kerja_id' => ['nullable', 'integer'],
         ])['bl'];
 
-        $this->projek->belanja()->create([...$data, 'penerima' => (string) $data['penerima']]);
+        $this->projek->belanja()->create([...$data, 'penerima' => (string) $data['penerima'],
+            'kerja_id' => $this->projek->idKerja($data['kerja_id'] ?? null)]);
         $this->rekod = null;
+    }
+
+    // ---------- Kerja ----------
+
+    public function ubahKerja(int $id): void
+    {
+        $this->authorize('update', $this->projek);
+        $k = $this->projek->kerja()->findOrFail($id);
+        $this->kerjaId = $k->id;
+        $this->k = ['nama' => $k->nama, 'nilai' => (string) $k->nilai, 'tarikh' => (string) $k->tarikh?->toDateString(), 'nota' => (string) $k->nota];
+        $this->rekod = 'kerja';
+    }
+
+    public function simpanKerja(): void
+    {
+        $this->authorize('update', $this->projek);
+        $data = $this->validate([
+            'k.nama' => ['required', 'string', 'max:255'],
+            'k.nilai' => ['required', 'numeric', 'min:0', 'max:999999999999'],
+            'k.tarikh' => ['nullable', 'date'],
+            'k.nota' => ['nullable', 'string', 'max:2000'],
+        ], [], ['k.nama' => 'nama kerja', 'k.nilai' => 'nilai'])['k'];
+        $data['tarikh'] = $data['tarikh'] ?: null;
+
+        if ($this->kerjaId) {
+            $this->projek->kerja()->findOrFail($this->kerjaId)->update($data);
+        } else {
+            $this->projek->tambahKerja($data);
+        }
+        $this->projek->refresh();
+        $this->rekod = null;
+    }
+
+    public function togolSiap(int $id): void
+    {
+        $this->authorize('update', $this->projek);
+        $k = $this->projek->kerja()->findOrFail($id);
+        $k->update(['siap' => ! $k->siap]);
+    }
+
+    public function padamKerja(int $id): void
+    {
+        $this->authorize('update', $this->projek);
+        $this->projek->kerja()->findOrFail($id)->delete();
+        $this->projek->refresh();
     }
 
     public function sahkan(int $id): void
@@ -122,11 +185,24 @@ class ButiranProjek extends Component
     {
         $p = Kiraan::projekDenganJumlah(Projek::whereKey($this->projek->id))->first();
         $user = auth()->user();
+        $bayaran = $this->projek->bayaran()->with('kerja:id,nama')->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get();
+        $belanja = $this->projek->belanja()->with(['perekod', 'kerja:id,nama'])->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get();
+
+        // Untung setiap kerja dari rekod yang sudah dimuat (tiada pertanyaan tambahan).
+        $diterima = $bayaran->where('status', '!=', Bayaran::MENUNGGU)->groupBy(fn ($x) => (int) $x->kerja_id)->map(fn ($g) => $g->sum(fn ($x) => Kiraan::sen($x->amaun)));
+        $keluar = $belanja->groupBy(fn ($x) => (int) $x->kerja_id)->map(fn ($g) => $g->sum(fn ($x) => Kiraan::sen($x->amaun)));
+        $kerja = $this->projek->kerja()->orderBy('tarikh')->orderBy('id')->get()->each(function ($k) use ($diterima, $keluar) {
+            $k->nilai_sen = Kiraan::sen($k->nilai);
+            $k->diterima_sen = $diterima[$k->id] ?? 0;
+            $k->belanja_sen = $keluar[$k->id] ?? 0;
+        });
 
         return view('livewire.butiran-projek', [
             'p' => $p,
-            'bayaran' => $this->projek->bayaran()->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get(),
-            'belanja' => $this->projek->belanja()->with('perekod')->orderByRaw('tarikh is null, tarikh desc')->orderByDesc('id')->get(),
+            'bayaran' => $bayaran,
+            'belanja' => $belanja,
+            'kerja' => $kerja,
+            'tanpaKerja' => ['diterima' => $diterima[0] ?? 0, 'belanja' => $keluar[0] ?? 0],
             'peringkat' => PeringkatAliran::orderBy('susunan')->get(),
             'kategori' => KategoriBelanja::orderBy('susunan')->pluck('nama'),
             'bolehUrus' => $user->can('update', $this->projek),

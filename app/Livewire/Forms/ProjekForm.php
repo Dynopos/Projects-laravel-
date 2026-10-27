@@ -36,6 +36,9 @@ class ProjekForm extends Form
     /** @var array<string, bool> */
     public array $aliran = [];
 
+    /** Nilai kontrak = Σ kerja bila projek ada kerja — medan nilai dikunci. */
+    public bool $adaKerja = false;
+
     /** Projek baharu sahaja: deposit awal jadi rekod bayaran Diterima. */
     public string $deposit = '';
 
@@ -49,9 +52,10 @@ class ProjekForm extends Form
     public function isi(Projek $p): void
     {
         $this->projek = $p;
-        $this->fill($p->only(['kod', 'nama', 'klien', 'lokasi', 'telefon', 'inv', 'status', 'nota']));
+        $this->fill($p->only(['kod', 'nama', 'klien', 'lokasi', 'telefon', 'inv', 'status']));
         $this->nota = (string) $p->nota;
         $this->nilai = (string) $p->nilai;
+        $this->adaKerja = $p->kerja()->exists();
         $this->mula = (string) $p->mula?->toDateString();
         $this->aliran = $p->aliran ?? [];
     }
@@ -92,6 +96,9 @@ class ProjekForm extends Form
 
         return DB::transaction(function () use ($medan, $data) {
             if ($this->projek) {
+                if ($this->projek->kerja()->exists()) {
+                    unset($medan['nilai']);     // diurus oleh Kerja
+                }
                 $this->projek->update($medan);
 
                 return $this->projek;

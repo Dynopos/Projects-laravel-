@@ -7,6 +7,7 @@ use App\Http\Middleware\TentukanSyarikat;
 use App\Models\Bayaran;
 use App\Models\Belanja;
 use App\Models\BelanjaUmum;
+use App\Models\Kerja;
 use App\Models\Projek;
 use App\Observers\CatatAktiviti;
 use App\Support\SyarikatSemasa;
@@ -34,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        foreach ([Projek::class, Bayaran::class, Belanja::class, BelanjaUmum::class] as $model) {
+        foreach ([Projek::class, Bayaran::class, Belanja::class, BelanjaUmum::class, Kerja::class] as $model) {
             $model::observe(CatatAktiviti::class);
         }
 

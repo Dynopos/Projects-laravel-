@@ -444,3 +444,8 @@ tr.baris-klik:hover td{background:var(--hover)}
 .kosong-projek{margin-bottom:16px;border-color:var(--gold-deep)}
 .kosong-projek h2{margin:0 0 6px;font-size:17px}
 .kosong-projek p{margin:0 0 14px;color:var(--ink2);font-size:14px}
+.kerja-status{cursor:pointer;background:none;margin-top:5px;font-family:var(--font)}
+.kerja-status:hover{border-color:var(--biru);color:var(--biru)}
+/* Butang tindakan halaman turun ke baris baharu di telefon, bukan terkeluar dari skrin. */
+.head .acts{flex-wrap:wrap}
+@media(max-width:640px){.head .acts{margin-left:0;width:100%}}
