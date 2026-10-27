@@ -410,3 +410,29 @@ code{background:var(--field);padding:1px 6px;border-radius:5px;font-size:12.5px;
   border:1px solid var(--warn);background:var(--card);font-size:13.5px}
 .jalur-langganan>span:first-child{flex:1 1 260px}
 .jalur-langganan>span:last-child:not(:first-child){color:var(--muted)}
+
+/* ---------- untung rugi ---------- */
+.carta-pnl{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px 10px;margin:0 0 14px}
+.carta-kepala{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:13.5px}
+.carta-kepala small{color:var(--muted);font-size:12px}
+.carta-pnl svg{display:block;width:100%;height:auto}
+.carta-pnl .grid{stroke:var(--grid);stroke-width:1}
+.carta-pnl .paksi{stroke:var(--muted);stroke-width:1}
+.carta-pnl .lbl{fill:var(--muted);font-size:11px;font-family:var(--font)}
+.carta-pnl .bar{fill:var(--brand)}
+.carta-pnl .kena{fill:transparent}
+.carta-pnl .lajur:hover .kena{fill:var(--hover)}
+.tbl table.ketat{min-width:560px}
+.tbl tfoot td{border-top:1px solid var(--line);background:var(--hover)}
+.num.rugi,.rugi{color:var(--crit)}
+tr.redup td{color:var(--muted)}
+.nota-pnl{font-size:12.5px;color:var(--muted);margin:8px 2px 16px}
+.tbl table.pnl-projek{min-width:820px}
+.pnl-projek td:first-child .tag{margin-top:4px}
+.eksport-kanan{margin-left:auto;display:flex;gap:8px}
+.carta-skrol{overflow-x:auto}
+@media(max-width:640px){.carta-pnl svg{min-width:560px}.eksport-kanan{margin-left:0}}
+.pnl-projek td:first-child{max-width:220px;white-space:normal}
+.pnl-projek td:first-child .tag{display:inline-flex;margin-top:5px}
+.pnl-projek th,.pnl-projek td{padding-left:10px;padding-right:10px}
+.pnl-projek td.num{font-size:13px}

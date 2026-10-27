@@ -243,6 +243,7 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] Tab Pembayaran — semua bayaran, kotak Diterima/Deposit/Menunggu (sama dengan Dashboard), sahkan & padam
 - [x] Tab Perbelanjaan — semua projek, tapis projek/kategori, ringkasan kategori, rekod & padam
 - [x] Import Excel — PROJECT FLOW (`HuraiFlow`) + generik (`HuraiGenerik`), pratonton & amaran
+- [x] Untung Rugi (PNL) ikut projek — `UntungRugi`: tunai bulanan + dijangka per projek, carta, eksport CSV/PDF (tiada overhead)
 - [x] Daftar sendiri + langganan CHIP (RM99 daftar, RM30/tahun), peringatan, baca sahaja, Terma & Privasi
 - [ ] Panel pentadbir (Filament)
 - [ ] PWA, masa nyata (Reverb)

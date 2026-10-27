@@ -33,6 +33,7 @@
     <a href="{{ route('belanja') }}" wire:navigate @class(['on' => request()->routeIs('belanja')])><svg viewBox="0 0 24 24"><path d="M4 7a2 2 0 012-2h11v4"/><path d="M4 7v11a2 2 0 002 2h13V9H6a2 2 0 01-2-2z"/><circle cx="16" cy="14.5" r="1.3"/></svg> Perbelanjaan</a>
     @if($u->peranan() !== \App\Enums\Peranan::Staf)
       <div class="navlab" style="margin-top:16px">DATA</div>
+      <a href="{{ route('pnl') }}" wire:navigate @class(['on' => request()->routeIs('pnl')])><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/><path d="M15 8h4v4"/></svg> Untung Rugi</a>
       @if($u->peranan()?->pengurusan())
         <a href="{{ route('import') }}" wire:navigate @class(['on' => request()->routeIs('import')])><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg> Import Excel</a>
       @endif

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Livewire\LaporanUntungRugi;
 use App\Models\Bayaran;
 use App\Models\Belanja;
 use App\Models\Projek;
@@ -16,7 +17,7 @@ use App\Models\User;
  */
 class Laporan
 {
-    public const JENIS = ['projek', 'arkib', 'bayaran', 'belanja'];
+    public const JENIS = ['projek', 'arkib', 'bayaran', 'belanja', 'pnl', 'pnl-bulan'];
 
     /** @param array<string, string> $t tapisan dari query string */
     public static function bina(string $jenis, User $user, array $t): array
@@ -26,6 +27,8 @@ class Laporan
             'arkib' => self::projek($user, $t, true),
             'bayaran' => self::bayaran($user, $t),
             'belanja' => self::belanja($user, $t),
+            'pnl' => self::pnl($user, $t),
+            'pnl-bulan' => self::pnlBulan($user, $t),
         };
     }
 
@@ -115,6 +118,54 @@ class Laporan
                 $x->penerima, $x->nota, $x->perekod?->name, Kiraan::sen($x->amaun)])->all(),
             'jumlah' => $rows->isEmpty() ? null : ['JUMLAH · '.$rows->count().' rekod', '', '', '', '', '', '',
                 $rows->sum(fn ($x) => Kiraan::sen($x->amaun))],
+        ];
+    }
+
+    private const KAT_PNL = ['aktif' => 'Projek aktif', 'siap' => 'Projek siap'];
+
+    private static function pnl(User $user, array $t): array
+    {
+        $kat = $t['kat'] ?? '';
+        $rows = UntungRugi::perProjek(LaporanUntungRugi::tapis(Projek::query()->bolehDilihat($user), $kat), $t['susun'] ?? 'kod');
+        $jn = $rows->sum('nilai_sen');
+        $jb = $rows->sum('belanja_sen');
+        $jd = $rows->sum('diterima_sen');
+
+        return [
+            'tajuk' => 'Untung Rugi ikut Projek',
+            'tapisan' => self::teksTapisan(['Projek' => self::KAT_PNL[$kat] ?? '']),
+            'lajur' => [
+                ['label' => 'Kod', 'jenis' => 'teks'], ['label' => 'Projek', 'jenis' => 'teks'], ['label' => 'Status', 'jenis' => 'teks'],
+                ['label' => 'Nilai Kontrak', 'jenis' => 'wang'], ['label' => 'Diterima', 'jenis' => 'wang'],
+                ['label' => 'Perbelanjaan', 'jenis' => 'wang'], ['label' => 'Untung Tunai', 'jenis' => 'wang'],
+                ['label' => 'Untung Dijangka', 'jenis' => 'wang'], ['label' => 'Margin', 'jenis' => 'teks'],
+            ],
+            'baris' => $rows->map(fn ($p) => [$p->kod, $p->nama, $p->status, $p->nilai_sen, $p->diterima_sen, $p->belanja_sen,
+                $p->untung_tunai, $p->untung_jangka, UntungRugi::teksMargin($p->margin)])->all(),
+            'jumlah' => $rows->isEmpty() ? null : ['JUMLAH · '.$rows->count().' projek', '', '', $jn, $jd, $jb, $jd - $jb, $jn - $jb,
+                UntungRugi::teksMargin(UntungRugi::margin($jn - $jb, $jn))],
+        ];
+    }
+
+    private static function pnlBulan(User $user, array $t): array
+    {
+        $kat = $t['kat'] ?? '';
+        $q = LaporanUntungRugi::tapis(Projek::query()->bolehDilihat($user), $kat);
+        $senarai = UntungRugi::senaraiTahun($q);
+        $tahun = in_array((int) ($t['tahun'] ?? 0), $senarai, true) ? (int) $t['tahun'] : $senarai[0];
+        $b = UntungRugi::bulanan($q, $tahun);
+        $bulan = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+
+        return [
+            'tajuk' => "Untung Rugi Bulanan {$tahun}",
+            'tapisan' => self::teksTapisan(['Tahun' => (string) $tahun, 'Projek' => self::KAT_PNL[$kat] ?? ''])
+                .($b['tanpa_tarikh'] ? " · {$b['tanpa_tarikh']} rekod tanpa tarikh tidak dikira" : ''),
+            'lajur' => [
+                ['label' => 'Bulan', 'jenis' => 'teks'], ['label' => 'Kutipan', 'jenis' => 'wang'], ['label' => 'Perbelanjaan', 'jenis' => 'wang'],
+                ['label' => 'Untung', 'jenis' => 'wang'], ['label' => 'Kumulatif', 'jenis' => 'wang'],
+            ],
+            'baris' => array_map(fn ($m) => [$bulan[$m['bulan'] - 1], $m['masuk'], $m['keluar'], $m['untung'], $m['kumulatif']], $b['bulan']),
+            'jumlah' => ["JUMLAH {$tahun}", $b['masuk'], $b['keluar'], $b['untung'], ''],
         ];
     }
 

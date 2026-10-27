@@ -18,7 +18,7 @@ class EksportController extends Controller
         abort_unless(in_array($jenis, Laporan::JENIS, true) && in_array($format, ['csv', 'pdf'], true), 404);
         abort_unless($request->user()->peranan()?->bolehEksport(), 403);
 
-        $tapisan = collect($request->only(['q', 'kat', 'susun', 'projek', 'status', 'jenis', 'kategori']))
+        $tapisan = collect($request->only(['q', 'kat', 'susun', 'projek', 'status', 'jenis', 'kategori', 'tahun']))
             ->map(fn ($v) => is_string($v) ? mb_substr($v, 0, 100) : '')->all();
         $l = Laporan::bina($jenis, $request->user(), $tapisan);
         $s = $semasa->wajib();
