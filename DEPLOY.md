@@ -102,7 +102,7 @@ php artisan dyno:jemput-pemilik finecabinetry            # pautan baharu (+ --se
 ```
 
 `--setahun` = pelanggan yang bayar RM99 secara manual: langganan aktif 12 bulan, dapat
-peringatan dan boleh bayar pembaharuan RM30 dalam app. Tanpanya = tiada tarikh tamat.
+peringatan dan boleh bayar pembaharuan RM99 dalam app. Tanpanya = tiada tarikh tamat.
 
 Pemilik menerima e-mel jemputan; arahan itu juga memaparkan pautan jemputan (sah 7 hari)
 jika e-mel belum disediakan. Selepas pemilik masuk, dia jemput staf dari **Ahli & Jemputan**.
@@ -118,7 +118,7 @@ jika e-mel belum disediakan. Selepas pemilik masuk, dia jemput staf dari **Ahli 
    (`https://dynoproject.my/chip/callback`), dan halaman selesai juga menyemak CHIP terus.
 
 Aliran: `/daftar` → CHIP (RM99) → syarikat dicipta, aktif 1 tahun → e-mel + butang
-"Tetapkan kata laluan" → pemilik masuk. Pembaharuan RM30: menu **Langganan** dalam app.
+"Tetapkan kata laluan" → pemilik masuk. Pembaharuan RM99: menu **Langganan** dalam app.
 Senarai bayaran: jadual `pembayaran_langganan`.
 
 ## Selepas landing page hidup (SEO)

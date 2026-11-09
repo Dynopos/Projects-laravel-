@@ -246,7 +246,7 @@ Kedua-dua mesti lulus sebelum push. Ujian RLS/trigger dilangkau dalam SQLite.
 - [x] Untung Rugi (PNL) — `UntungRugi`: bulanan (untung projek − perbelanjaan umum = untung bersih), per projek (untung setakat ini / untung bila siap), carta, eksport
 - [x] Kerja dalam projek (`kerja`, RLS): projek payung untuk kerja kecil berulang; projek.nilai = Σ kerja.nilai (Kerja::saved); bayaran/belanja.kerja_id pilihan; kerja baharu buka semula projek Siap
 - [x] Perbelanjaan umum (overhead) — jadual `belanja_umum` (RLS), tab Umum dalam Perbelanjaan; tidak mengubah Baki Terkini projek
-- [x] Daftar sendiri + langganan CHIP (RM99 daftar, RM30/tahun), peringatan, baca sahaja, Terma & Privasi
+- [x] Daftar sendiri + langganan CHIP (RM99 daftar, RM99/tahun), peringatan, baca sahaja, Terma & Privasi
 - [ ] Panel pentadbir (Filament)
 - [ ] PWA, masa nyata (Reverb)
 - [ ] Migrasi Fine Cabinetry

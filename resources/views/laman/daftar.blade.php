@@ -3,8 +3,8 @@
   $baharu = number_format(config('dyno.harga.pembaharuan') / 100, 0);
   $domain = config('dyno.domain_utama');
 @endphp
-<x-laman.halaman title="Daftar Dyno Project OS — RM{{ $harga }} tahun pertama" laluan="/daftar"
-  description="Daftar ruang syarikat anda di Dyno Project OS. RM{{ $harga }} untuk persediaan dan tahun pertama, kemudian RM{{ $baharu }} setahun. Bayar dengan FPX atau kad.">
+<x-laman.halaman title="Daftar Dyno Project OS — RM{{ $harga }} setahun" laluan="/daftar"
+  description="Daftar ruang syarikat anda di Dyno Project OS. RM{{ $harga }} setahun termasuk persediaan, hosting dan sandaran. Bayar dengan FPX atau kad.">
   <div class="daftar">
     <section>
       <p class="kening">Daftar syarikat</p>
@@ -70,8 +70,8 @@
 
     <aside class="kad harga-kad">
       <p class="kening">Harga</p>
-      <p class="harga">RM{{ $harga }}<small>tahun pertama</small></p>
-      <p class="harga-kecil">Kemudian RM{{ $baharu }} setahun</p>
+      <p class="harga">RM{{ $harga }}<small>setahun</small></p>
+      <p class="harga-kecil">@if($harga === $baharu)Pembaharuan RM{{ $baharu }} setahun. Persediaan percuma.@else Kemudian RM{{ $baharu }} setahun @endif</p>
       <ul>
         <li>Projek, kutipan, perbelanjaan dan baki terkini</li>
         <li>Pengguna untuk pemilik, pengurus, staf dan akauntan</li>

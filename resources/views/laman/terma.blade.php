@@ -17,8 +17,8 @@
 
     <h2>2. Harga dan pembaharuan</h2>
     <ul>
-      <li><b>RM{{ $daftar }}</b> sekali bayar: persediaan dan langganan tahun pertama.</li>
-      <li><b>RM{{ $baharu }} setahun</b> bermula tahun kedua, dibayar dalam sistem (halaman Langganan). Pembaharuan ditambah dari tarikh tamat.</li>
+      <li><b>RM{{ $daftar }}</b> semasa mendaftar: langganan 12 bulan, termasuk persediaan.</li>
+      <li><b>RM{{ $baharu }} setahun</b> untuk pembaharuan, dibayar dalam sistem (halaman Langganan). Pembaharuan ditambah dari tarikh tamat.</li>
       <li>Peringatan dihantar 30, 7 dan 1 hari sebelum tamat. Jika tidak diperbaharui dalam {{ config('dyno.tempoh_tangguh') }} hari selepas tamat, sistem bertukar ke mod baca sahaja; data tidak dipadam dan boleh dieksport.</li>
       <li>Bayaran tidak dikembalikan kecuali Dyno menamatkan perkhidmatan tanpa kesalahan Pelanggan (pro rata). Harga pembaharuan boleh diubah dengan notis 60 hari sebelum tarikh pembaharuan.</li>
     </ul>

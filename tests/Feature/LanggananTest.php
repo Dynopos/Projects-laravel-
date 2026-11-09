@@ -188,7 +188,7 @@ it('pemilik memperbaharui: setahun ditambah dari tarikh tamat', function () {
     Livewire::actingAs($pemilik)->test(UrusLangganan::class)->assertSee('10 hari lagi')
         ->call('bayar')->assertRedirect('https://gate.chip-in.asia/p/pur-1/');
     $p = PembayaranLangganan::sole();
-    expect($p)->jenis->toBe('pembaharuan')->amaun_sen->toBe(3000)->syarikat_id->toBe($s->id);
+    expect($p)->jenis->toBe('pembaharuan')->amaun_sen->toBe(9900)->syarikat_id->toBe($s->id);
 
     $this->purchase['pur-1']['status'] = 'paid';
     callbackChip($this, 'pur-1')->assertOk();
@@ -249,7 +249,7 @@ it('jalur amaran dipapar kepada pemilik bila hampir tamat', function () {
 });
 
 it('terma, privasi dan sitemap', function () {
-    $this->get(urlLaman('/terma'))->assertOk()->assertSee('RM99.00')->assertSee('RM30.00 setahun');
+    $this->get(urlLaman('/terma'))->assertOk()->assertSee('RM99.00')->assertSee('RM99.00 setahun');
     $this->get(urlLaman('/privasi'))->assertOk()->assertSee('Akta 709')->assertSee('72 jam');
     $this->get(urlLaman('/sitemap.xml'))->assertSee('/daftar</loc>', false)->assertSee('/privasi</loc>', false);
     $this->get(urlLaman('/'))->assertSee('href="/daftar"', false)->assertSee('"priceCurrency":"MYR"', false);

@@ -40,7 +40,7 @@
       @foreach($sejarah as $b)
         <tr wire:key="b-{{ $b->id }}">
           <td>{{ $b->dibayar_pada->timezone($syarikat->zon_waktu)->format('d/m/Y') }}</td>
-          <td>{{ $b->jenis === 'daftar' ? 'Daftar + tahun pertama' : 'Pembaharuan 1 tahun' }}</td>
+          <td>{{ $b->jenis === 'daftar' ? 'Daftar · 12 bulan' : 'Pembaharuan 1 tahun' }}</td>
           <td>{{ $b->rujukan() }}</td>
           <td style="text-align:right">RM{{ number_format($b->amaun_sen / 100, 2) }}</td>
         </tr>

@@ -18,7 +18,7 @@ return [
     // Harga langganan dalam sen (CHIP). Daftar = persediaan + tahun pertama; pembaharuan = setiap tahun.
     'harga' => [
         'daftar' => (int) env('DYNO_HARGA_DAFTAR', 9900),
-        'pembaharuan' => (int) env('DYNO_HARGA_PEMBAHARUAN', 3000),
+        'pembaharuan' => (int) env('DYNO_HARGA_PEMBAHARUAN', 9900),
     ],
 
     // Hari selepas aktif_hingga sebelum syarikat jadi baca sahaja.

@@ -10,7 +10,7 @@
     ['Boleh bawa masuk data Excel sedia ada?', 'Ya. Import Excel memadankan lajur secara automatik, kemudian menunjukkan pratonton dan semakan jumlah sebelum apa-apa disimpan.'],
     ['Boleh staf sahkan bayaran sendiri?', 'Tidak. Bayaran yang staf rekod masuk sebagai Menunggu. Pemilik atau pengurus mesti menyemak dan mengesahkannya sebelum baki terkini berubah.'],
     ['Adakah data syarikat saya selamat?', 'Data setiap syarikat dikunci dalam kod aplikasi dan dalam pangkalan data, dan diuji secara automatik supaya tidak boleh dibaca oleh syarikat lain. Setiap tindakan direkod dalam log aktiviti yang tidak boleh dipadam.'],
-    ['Berapa harga Dyno Project OS?', "RM{$harga} untuk persediaan dan langganan tahun pertama, kemudian RM{$baharu} setahun. Daftar dan bayar online dengan FPX atau kad, dan ruang syarikat anda dicipta sebaik bayaran disahkan."],
+    ['Berapa harga Dyno Project OS?', ($harga === $baharu ? "RM{$harga} setahun, termasuk persediaan, hosting, sandaran dan kemas kini." : "RM{$harga} untuk persediaan dan langganan tahun pertama, kemudian RM{$baharu} setahun.")." Daftar dan bayar online dengan FPX atau kad, dan ruang syarikat anda dicipta sebaik bayaran disahkan."],
     ['Adakah invois dan notifikasi WhatsApp tersedia?', 'Belum. Invois PDF, notifikasi WhatsApp, pembantu bil AI dan lampiran gambar resit ialah ciri dalam perancangan. Eksport laporan CSV dan PDF sudah tersedia.'],
   ];
   // Kunci "@..." dibina dengan "\x40" — Blade menganggap '@context' dalam templat sebagai arahan @context.
@@ -73,7 +73,7 @@
       <h1><span class="h1-kata-kunci">Sistem pengurusan projek kontraktor</span> Setiap projek. Setiap ringgit. <em>Dalam kawalan.</em></h1>
       <p class="lead">Dyno Project OS menghimpunkan projek, kutipan dan perbelanjaan dalam satu sistem — tahu baki sebenar setiap projek tanpa selongkar Excel satu per satu.</p>
       <div class="tindakan">
-        <a class="btn emas besar" href="/daftar">Daftar — RM{{ $harga }} tahun pertama</a>
+        <a class="btn emas besar" href="/daftar">Daftar — RM{{ $harga }} setahun</a>
         <a class="btn hantu besar" href="{{ $demo }}" @if(str_starts_with($demo, 'http')) target="_blank" rel="noopener" @endif>Minta demo percuma <span aria-hidden="true">↗</span></a>
       </div>
       <p class="mikro"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Di pejabat atau di tapak. Web, iPhone &amp; Android.</p>
@@ -215,9 +215,9 @@
         <p>Tiada pakej bertingkat dan tiada caj tersembunyi. Bayar dengan FPX, kad atau e-dompet melalui CHIP — ruang syarikat anda sedia sebaik bayaran disahkan.</p>
       </div>
       <div class="kad harga-kad">
-        <p class="kening">Tahun pertama</p>
-        <p class="harga">RM{{ $harga }}<small>persediaan + langganan 12 bulan</small></p>
-        <p class="harga-kecil">Kemudian RM{{ $baharu }} setahun</p>
+        <p class="kening">Langganan tahunan</p>
+        <p class="harga">RM{{ $harga }}<small>setahun · 12 bulan</small></p>
+        <p class="harga-kecil">@if($harga === $baharu)Pembaharuan RM{{ $baharu }} setahun. Persediaan percuma.@else Kemudian RM{{ $baharu }} setahun @endif</p>
         <ul>
           <li>Projek, kutipan, perbelanjaan dan baki terkini</li>
           <li>Empat peranan: pemilik, pengurus, staf, akauntan</li>
